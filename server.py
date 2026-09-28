@@ -36,6 +36,7 @@ app.add_middleware(
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+os.makedirs(STATIC_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 ADMIN_SECRET_PASSWORD = os.environ.get("ADMIN_SECRET_PASSWORD", "admin@saas2026")
@@ -253,12 +254,20 @@ def update_google_forms(req: UpdateGoogleFormsRequest):
 @app.get("/", response_class=HTMLResponse)
 def serve_kiosk_ui():
     index_path = os.path.join(STATIC_DIR, "index.html")
-    return FileResponse(index_path)
+    if not os.path.exists(index_path):
+        index_path = os.path.join(BASE_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return HTMLResponse("<h2>Kiosk UI: Vui lòng tải thư mục static lên GitHub!</h2>")
 
 @app.get("/admin", response_class=HTMLResponse)
 def serve_admin_ui():
     admin_path = os.path.join(STATIC_DIR, "admin.html")
-    return FileResponse(admin_path)
+    if not os.path.exists(admin_path):
+        admin_path = os.path.join(BASE_DIR, "admin.html")
+    if os.path.exists(admin_path):
+        return FileResponse(admin_path)
+    return HTMLResponse("<h2>Admin UI: Vui lòng tải thư mục static lên GitHub!</h2>")
 
 if __name__ == "__main__":
     import uvicorn
