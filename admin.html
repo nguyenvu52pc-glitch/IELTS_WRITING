@@ -3,41 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trung Tâm Quản Trị Whitelist Email & Google Form</title>
+  <title>Trung Tâm Quản Trị Whitelist Email & Google Form - TimeClock SaaS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="/static/css/style.css">
+
   <style>
+    :root {
+      --bg-dark: #08090d;
+      --bg-surface: #10131a;
+      --bg-card: #141722;
+      --bg-input: #0a0c12;
+      --primary-red: #e50914;
+      --primary-red-hover: #ff1e2b;
+      --red-glow: rgba(229, 9, 20, 0.45);
+      --accent-green: #10b981;
+      --text-white: #ffffff;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(229, 9, 20, 0.6);
+      --font-main: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Background Grid & Glow */
+    .bg-grid {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* =====================================================================
+       CỔNG ĐĂNG NHẬP ADMIN (AUTH OVERLAY)
+       ===================================================================== */
     .admin-auth-overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: #08090c;
+      background: rgba(8, 9, 13, 0.96);
+      backdrop-filter: blur(12px);
       z-index: 9999;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
     }
+
     .auth-box {
-      background: #12151e;
-      border: 2px solid var(--primary-red);
-      border-radius: 18px;
+      background: var(--bg-card);
+      border: 1px solid rgba(229, 9, 20, 0.4);
+      border-radius: 20px;
       padding: 40px;
-      max-width: 460px;
+      max-width: 440px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 0 50px rgba(229, 9, 20, 0.4);
+      box-shadow: 0 0 50px rgba(229, 9, 20, 0.35);
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
+
     .auth-icon-circle {
       width: 64px; height: 64px;
-      background: rgba(229, 9, 20, 0.2);
-      border: 1px solid var(--primary-red);
+      background: rgba(229, 9, 20, 0.15);
+      border: 1.5px solid var(--primary-red);
       border-radius: 50%;
       margin: 0 auto;
       display: flex;
@@ -45,116 +97,361 @@
       justify-content: center;
       color: #ff5252;
     }
+
+    .auth-box h2 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .auth-box p {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
     .auth-box input {
-      background: #0a0c10;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
+      background: var(--bg-input);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
       padding: 14px 18px;
       color: #fff;
       font-size: 1rem;
       outline: none;
       text-align: center;
       font-family: var(--font-mono);
-    }
-    .auth-box input:focus {
-      border-color: var(--primary-red);
+      transition: all 0.2s;
     }
 
+    .auth-box input:focus {
+      border-color: var(--primary-red);
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+      background: #0e111a;
+    }
+
+    /* =====================================================================
+       KHUNG GIAO DIỆN CHÍNH
+       ===================================================================== */
     .admin-wrapper {
-      max-width: 1350px;
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 30px;
+      padding: 28px 24px 60px 24px;
       display: flex;
       flex-direction: column;
       gap: 28px;
     }
+
     .admin-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #11141c;
-      padding: 20px 30px;
-      border-radius: 14px;
-      border: 1px solid var(--border-light);
+      background: var(--bg-surface);
+      padding: 20px 28px;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
       border-left: 5px solid var(--primary-red);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     }
+
     .admin-title-box h1 {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 900;
-      color: #fff;
+      color: #ffffff;
+      letter-spacing: 0.5px;
     }
+
     .admin-title-box p {
-      font-size: 0.85rem;
+      font-size: 0.86rem;
       color: var(--text-dim);
+      margin-top: 4px;
     }
+
     .admin-grid {
       display: grid;
-      grid-template-columns: 38% 62%;
+      grid-template-columns: 420px 1fr;
       gap: 28px;
     }
+
+    @media (max-width: 1080px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .admin-card {
-      background: #131620;
-      border: 1px solid var(--border-light);
-      border-radius: 16px;
-      padding: 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 26px;
       display: flex;
       flex-direction: column;
       gap: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     }
+
     .admin-card-title {
       font-size: 1.15rem;
       font-weight: 800;
       display: flex;
       align-items: center;
       gap: 10px;
-      color: #fff;
-      border-bottom: 1px solid var(--border-light);
-      padding-bottom: 12px;
+      color: #ffffff;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
     }
+
     .admin-card-title svg {
-      width: 20px; height: 20px;
+      width: 22px; height: 22px;
       color: var(--primary-red);
     }
+
+    .card-helper-text {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-top: -6px;
+    }
+
+    /* =====================================================================
+       FORM INPUT CONTROLS (CAO CẤP, TƯƠNG PHẢN CAO)
+       ===================================================================== */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .input-group input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: #ffffff;
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: var(--font-main);
+    }
+
+    .input-group input[type="email"],
+    .input-group input[type="url"],
+    .input-group input[type="password"] {
+      font-family: var(--font-mono);
+    }
+
+    .input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.28);
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary-red);
+      background: #0f121b;
+      box-shadow: 0 0 16px rgba(229, 9, 20, 0.4);
+    }
+
+    /* =====================================================================
+       BUTTONS
+       ===================================================================== */
+    .plan-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s ease;
+      color: #fff;
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg, var(--primary-red) 0%, #b8050e 100%);
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4);
+    }
+
+    .btn-red:hover {
+      background: var(--primary-red-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(229, 9, 20, 0.65);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    /* =====================================================================
+       DATA TABLE (WHITELIST)
+       ===================================================================== */
+    .data-table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
     .data-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       font-size: 0.88rem;
     }
+
     .data-table th {
-      background: #0b0d13;
-      padding: 12px 14px;
+      background: #0b0d14;
+      padding: 14px 16px;
       text-align: left;
       font-weight: 700;
       color: var(--text-dim);
-      border-bottom: 1px solid var(--border-light);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border-subtle);
     }
+
     .data-table td {
-      padding: 12px 14px;
+      padding: 14px 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       color: var(--text-muted);
+      vertical-align: middle;
     }
-    .btn-action-del {
-      background: rgba(229, 9, 20, 0.15);
-      border: 1px solid rgba(229, 9, 20, 0.4);
-      color: #ff5252;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.75rem;
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .email-code {
+      color: #60a5fa !important;
+      font-family: var(--font-mono);
       font-weight: 700;
     }
+
+    .employee-name-text {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .red-tag {
+      display: inline-block;
+      background: rgba(229, 9, 20, 0.18);
+      border: 1px solid rgba(229, 9, 20, 0.4);
+      color: #ff6b6b;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-green {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .badge-red {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .btn-action-del {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 800;
+      transition: all 0.2s;
+    }
+
     .btn-action-del:hover {
       background: var(--primary-red);
       color: #fff;
     }
+
     .btn-action-toggle {
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-light);
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      color: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 0.75rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .btn-action-toggle:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #181b26;
+      border-left: 4px solid var(--primary-red);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
   </style>
 </head>
@@ -165,17 +462,16 @@
   <div id="adminAuthOverlay" class="admin-auth-overlay">
     <div class="auth-box">
       <div class="auth-icon-circle"><i data-lucide="shield-alert" style="width: 32px; height: 32px;"></i></div>
-      <h2 style="font-size: 1.4rem; font-weight: 900;">XÁC THỰC MÁY CHỦ QUẢN TRỊ</h2>
-      <p style="font-size: 0.88rem; color: var(--text-dim);">
-        Vui lòng nhập mật khẩu quản trị máy chủ để mở trang cài đặt:
-      </p>
+      <h2>XÁC THỰC MÁY CHỦ QUẢN TRỊ</h2>
+      <p>Vui lòng nhập mật khẩu quản trị máy chủ để mở trang cấu hình hệ thống:</p>
       <input type="password" id="adminPasswordInput" placeholder="Nhập mật khẩu Admin..." autofocus autocomplete="off">
-      <button id="btnAdminLogin" class="plan-btn btn-red" style="padding: 12px;">
+      <button id="btnAdminLogin" class="plan-btn btn-red" style="padding: 14px;">
         <i data-lucide="unlock"></i> ĐĂNG NHẬP MÁY CHỦ
       </button>
     </div>
   </div>
 
+  <!-- GIAO DIỆN CHÍNH ADMIN -->
   <div class="admin-wrapper" id="adminContentWrapper" style="display: none;">
     <!-- Header -->
     <header class="admin-header">
@@ -183,8 +479,8 @@
         <h1>TRUNG TÂM QUẢN TRỊ EMAIL CẤP PHÉP & GOOGLE FORM</h1>
         <p>Kiểm soát danh sách Email Google nhân viên được phép sử dụng Kiosk điểm danh</p>
       </div>
-      <div style="display: flex; gap: 12px;">
-        <button id="btnAdminLogout" class="plan-btn" style="background: rgba(255,255,255,0.08); padding: 10px 16px;">
+      <div>
+        <button id="btnAdminLogout" class="plan-btn btn-secondary">
           <i data-lucide="log-out"></i> Đăng Xuất
         </button>
       </div>
@@ -197,32 +493,32 @@
         
         <!-- Card 1: Thêm Email Mới Vào Danh Sách Cho Phép -->
         <div class="admin-card">
-          <h3 class="admin-card-title"><i data-lucide="user-plus"></i> Thêm Email Nhân Viên Được Cấp Phép</h3>
-          <p style="font-size: 0.84rem; color: var(--text-dim); margin-top: -10px;">
-            Chỉ những nhân viên có Email nằm trong danh sách này mới có thể đăng nhập Google để điểm danh:
+          <h3 class="admin-card-title"><i data-lucide="user-plus"></i> Thêm Email Nhân Viên Cấp Phép</h3>
+          <p class="card-helper-text">
+            Chỉ những nhân viên có Email nằm trong danh sách này mới có thể đăng nhập Kiosk để điểm danh:
           </p>
 
           <div class="input-group">
             <label>Địa chỉ Email Google (*):</label>
-            <input type="email" id="newAllowedEmail" placeholder="Ví dụ: nhanvien.nguyenan@gmail.com">
+            <input type="email" id="newAllowedEmail" placeholder="nhanvien.an@gmail.com" autocomplete="off">
           </div>
 
           <div class="input-group">
             <label>Họ và Tên Nhân Viên (*):</label>
-            <input type="text" id="newEmployeeName" placeholder="Ví dụ: Nguyễn Văn An">
+            <input type="text" id="newEmployeeName" placeholder="Ví dụ: Nguyễn Văn An" autocomplete="off">
           </div>
 
           <div class="input-group">
             <label>Mật Khẩu Cấp Cho Nhân Viên (*):</label>
-            <input type="password" id="newEmployeePassword" placeholder="Đặt mật khẩu (Ví dụ: 123456)" autocomplete="off">
+            <input type="password" id="newEmployeePassword" placeholder="Đặt mật khẩu đăng nhập..." autocomplete="off">
           </div>
 
           <div class="input-group">
             <label>Chức Vụ / Vị Trí Làm Việc:</label>
-            <input type="text" id="newEmployeeRole" placeholder="Ví dụ: Thu Ngân, Pha Chế, Quản Lý...">
+            <input type="text" id="newEmployeeRole" placeholder="Thu Ngân, Pha Chế, Phục Vụ..." autocomplete="off">
           </div>
 
-          <button id="btnAddAllowedEmail" class="plan-btn btn-red" style="margin-top: 6px;">
+          <button id="btnAddAllowedEmail" class="plan-btn btn-red" style="margin-top: 8px;">
             <i data-lucide="plus-circle"></i> Cấp Phép Cho Email Này
           </button>
         </div>
@@ -230,6 +526,9 @@
         <!-- Card 2: Cài Đặt Liên Kết Google Form -->
         <div class="admin-card">
           <h3 class="admin-card-title"><i data-lucide="file-spreadsheet"></i> Cấu Hình Google Form Chấm Công</h3>
+          <p class="card-helper-text">
+            Kiosk sẽ tự động nhúng và hiển thị các Google Form này khi nhân viên bấm Check-In / Check-Out:
+          </p>
 
           <div class="input-group">
             <label>URL Google Form "WORK IN" (Vào Ca):</label>
@@ -241,7 +540,7 @@
             <input type="url" id="inputFormWorkOut" placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true">
           </div>
 
-          <button id="btnSaveGoogleForms" class="plan-btn" style="background: rgba(229,9,20,0.2); border-color: var(--primary-red); color: #fff;">
+          <button id="btnSaveGoogleForms" class="plan-btn btn-red" style="margin-top: 8px;">
             <i data-lucide="save"></i> Lưu Liên Kết Google Form
           </button>
         </div>
@@ -250,14 +549,14 @@
       <!-- CỘT PHẢI: BẢNG DANH SÁCH EMAIL ĐÃ CẤP PHÉP -->
       <div style="display: flex; flex-direction: column; gap: 24px;">
         <div class="admin-card">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px;">
             <h3 class="admin-card-title" style="border: none; padding: 0;">
               <i data-lucide="shield-check"></i> Danh Sách Email Được Quyền Sử Dụng (Whitelist)
             </h3>
             <span id="whitelistCountBadge" class="red-tag">0 Email</span>
           </div>
 
-          <div style="overflow-x: auto;">
+          <div class="data-table-container">
             <table class="data-table">
               <thead>
                 <tr>
@@ -343,17 +642,18 @@
           const tr = document.createElement("tr");
           const isActive = item.is_active === 1;
           tr.innerHTML = `
-            <td><strong style="color: #8ab4f8; font-family: var(--font-mono);">${item.email}</strong></td>
-            <td>${item.employee_name}</td>
+            <td><span class="email-code">${item.email}</span></td>
+            <td><span class="employee-name-text">${item.employee_name}</span></td>
             <td><span class="red-tag">${item.role}</span></td>
             <td>
               <span class="${isActive ? 'badge-green' : 'badge-red'}">
+                <i data-lucide="${isActive ? 'check' : 'x'}" style="width: 13px; height: 13px;"></i>
                 ${isActive ? 'CHO PHÉP' : 'ĐÃ KHÓA'}
               </span>
             </td>
-            <td style="font-size: 0.8rem; font-family: var(--font-mono);">${item.last_login || 'Chưa đăng nhập'}</td>
+            <td style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-dim);">${item.last_login || 'Chưa đăng nhập'}</td>
             <td>
-              <div style="display: flex; gap: 6px;">
+              <div style="display: flex; gap: 8px;">
                 <button class="btn-action-toggle" onclick="toggleEmail(${item.id})">
                   ${isActive ? 'Khóa' : 'Mở'}
                 </button>
@@ -421,7 +721,6 @@
         showToast("Lỗi kết nối: " + err.message);
       }
     });
-
 
     window.toggleEmail = async function(id) {
       try {
