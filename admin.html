@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tâm Quản Trị Whitelist Email & Google Form</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .admin-auth-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #08090c;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .auth-box {
+      background: #12151e;
+      border: 2px solid var(--primary-red);
+      border-radius: 18px;
+      padding: 40px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(229, 9, 20, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .auth-icon-circle {
+      width: 64px; height: 64px;
+      background: rgba(229, 9, 20, 0.2);
+      border: 1px solid var(--primary-red);
+      border-radius: 50%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff5252;
+    }
+    .auth-box input {
+      background: #0a0c10;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+    .auth-box input:focus {
+      border-color: var(--primary-red);
+    }
+
+    .admin-wrapper {
+      max-width: 1350px;
+      margin: 0 auto;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #11141c;
+      padding: 20px 30px;
+      border-radius: 14px;
+      border: 1px solid var(--border-light);
+      border-left: 5px solid var(--primary-red);
+    }
+    .admin-title-box h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .admin-title-box p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 38% 62%;
+      gap: 28px;
+    }
+    .admin-card {
+      background: #131620;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .admin-card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 12px;
+    }
+    .admin-card-title svg {
+      width: 20px; height: 20px;
+      color: var(--primary-red);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .data-table th {
+      background: #0b0d13;
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+    .btn-action-del {
+      background: rgba(229, 9, 20, 0.15);
+      border: 1px solid rgba(229, 9, 20, 0.4);
+      color: #ff5252;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .btn-action-del:hover {
+      background: var(--primary-red);
+      color: #fff;
+    }
+    .btn-action-toggle {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-light);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <!-- CỔNG BẢO MẬT MẬT KHẨU MÁY CHỦ -->
+  <div id="adminAuthOverlay" class="admin-auth-overlay">
+    <div class="auth-box">
+      <div class="auth-icon-circle"><i data-lucide="shield-alert" style="width: 32px; height: 32px;"></i></div>
+      <h2 style="font-size: 1.4rem; font-weight: 900;">XÁC THỰC MÁY CHỦ QUẢN TRỊ</h2>
+      <p style="font-size: 0.88rem; color: var(--text-dim);">
+        Vui lòng nhập mật khẩu quản trị máy chủ để mở trang cài đặt:
+      </p>
+      <input type="password" id="adminPasswordInput" placeholder="Nhập mật khẩu Admin..." autofocus autocomplete="off">
+      <button id="btnAdminLogin" class="plan-btn btn-red" style="padding: 12px;">
+        <i data-lucide="unlock"></i> ĐĂNG NHẬP MÁY CHỦ
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-wrapper" id="adminContentWrapper" style="display: none;">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-title-box">
+        <h1>TRUNG TÂM QUẢN TRỊ EMAIL CẤP PHÉP & GOOGLE FORM</h1>
+        <p>Kiểm soát danh sách Email Google nhân viên được phép sử dụng Kiosk điểm danh</p>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button id="btnAdminLogout" class="plan-btn" style="background: rgba(255,255,255,0.08); padding: 10px 16px;">
+          <i data-lucide="log-out"></i> Đăng Xuất
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="admin-grid">
+      <!-- CỘT TRÁI: THÊM EMAIL CẤP PHÉP & CÀI ĐẶT GOOGLE FORM -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- Card 1: Thêm Email Mới Vào Danh Sách Cho Phép -->
+        <div class="admin-card">
+          <h3 class="admin-card-title"><i data-lucide="user-plus"></i> Thêm Email Nhân Viên Được Cấp Phép</h3>
+          <p style="font-size: 0.84rem; color: var(--text-dim); margin-top: -10px;">
+            Chỉ những nhân viên có Email nằm trong danh sách này mới có thể đăng nhập Google để điểm danh:
+          </p>
+
+          <div class="input-group">
+            <label>Địa chỉ Email Google (*):</label>
+            <input type="email" id="newAllowedEmail" placeholder="Ví dụ: nhanvien.nguyenan@gmail.com">
+          </div>
+
+          <div class="input-group">
+            <label>Họ và Tên Nhân Viên (*):</label>
+            <input type="text" id="newEmployeeName" placeholder="Ví dụ: Nguyễn Văn An">
+          </div>
+
+          <div class="input-group">
+            <label>Mật Khẩu Cấp Cho Nhân Viên (*):</label>
+            <input type="password" id="newEmployeePassword" placeholder="Đặt mật khẩu (Ví dụ: 123456)" autocomplete="off">
+          </div>
+
+          <div class="input-group">
+            <label>Chức Vụ / Vị Trí Làm Việc:</label>
+            <input type="text" id="newEmployeeRole" placeholder="Ví dụ: Thu Ngân, Pha Chế, Quản Lý...">
+          </div>
+
+          <button id="btnAddAllowedEmail" class="plan-btn btn-red" style="margin-top: 6px;">
+            <i data-lucide="plus-circle"></i> Cấp Phép Cho Email Này
+          </button>
+        </div>
+
+        <!-- Card 2: Cài Đặt Liên Kết Google Form -->
+        <div class="admin-card">
+          <h3 class="admin-card-title"><i data-lucide="file-spreadsheet"></i> Cấu Hình Google Form Chấm Công</h3>
+
+          <div class="input-group">
+            <label>URL Google Form "WORK IN" (Vào Ca):</label>
+            <input type="url" id="inputFormWorkIn" placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true">
+          </div>
+
+          <div class="input-group">
+            <label>URL Google Form "WORK OUT" (Tan Ca):</label>
+            <input type="url" id="inputFormWorkOut" placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true">
+          </div>
+
+          <button id="btnSaveGoogleForms" class="plan-btn" style="background: rgba(229,9,20,0.2); border-color: var(--primary-red); color: #fff;">
+            <i data-lucide="save"></i> Lưu Liên Kết Google Form
+          </button>
+        </div>
+      </div>
+
+      <!-- CỘT PHẢI: BẢNG DANH SÁCH EMAIL ĐÃ CẤP PHÉP -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="admin-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 12px;">
+            <h3 class="admin-card-title" style="border: none; padding: 0;">
+              <i data-lucide="shield-check"></i> Danh Sách Email Được Quyền Sử Dụng (Whitelist)
+            </h3>
+            <span id="whitelistCountBadge" class="red-tag">0 Email</span>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Email Google</th>
+                  <th>Họ và Tên</th>
+                  <th>Chức Vụ</th>
+                  <th>Trạng Thái</th>
+                  <th>Lần Cuối Đăng Nhập</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="whitelistTableBody">
+                <!-- Nạp tự động từ SQLite -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastNotification" class="toast">Đã thực hiện thành công</div>
+
+  <script>
+    function checkAdminAuth() {
+      const token = sessionStorage.getItem("saas_admin_token");
+      if (token) {
+        document.getElementById("adminAuthOverlay").style.display = "none";
+        document.getElementById("adminContentWrapper").style.display = "flex";
+        loadAdminData();
+      } else {
+        document.getElementById("adminAuthOverlay").style.display = "flex";
+        document.getElementById("adminContentWrapper").style.display = "none";
+      }
+    }
+
+    document.getElementById("btnAdminLogin").addEventListener("click", async () => {
+      const pass = document.getElementById("adminPasswordInput").value.trim();
+      if (!pass) {
+        showToast("Vui lòng nhập mật khẩu quản trị!");
+        return;
+      }
+      try {
+        const res = await fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          sessionStorage.setItem("saas_admin_token", data.token);
+          checkAdminAuth();
+          showToast("Đăng nhập máy chủ thành công!");
+        } else {
+          showToast(data.detail || "Sai mật khẩu quản trị!");
+        }
+      } catch (err) {
+        showToast("Lỗi kết nối máy chủ: " + err.message);
+      }
+    });
+
+    document.getElementById("adminPasswordInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnAdminLogin").click();
+    });
+
+    document.getElementById("btnAdminLogout").addEventListener("click", () => {
+      sessionStorage.removeItem("saas_admin_token");
+      checkAdminAuth();
+    });
+
+    async function loadAdminData() {
+      try {
+        const res = await fetch("/api/admin/allowed-emails");
+        const data = await res.json();
+
+        // Render Whitelist Emails
+        const tbody = document.getElementById("whitelistTableBody");
+        tbody.innerHTML = "";
+        const emails = data.allowed_emails || [];
+        document.getElementById("whitelistCountBadge").textContent = `${emails.length} Email`;
+
+        emails.forEach(item => {
+          const tr = document.createElement("tr");
+          const isActive = item.is_active === 1;
+          tr.innerHTML = `
+            <td><strong style="color: #8ab4f8; font-family: var(--font-mono);">${item.email}</strong></td>
+            <td>${item.employee_name}</td>
+            <td><span class="red-tag">${item.role}</span></td>
+            <td>
+              <span class="${isActive ? 'badge-green' : 'badge-red'}">
+                ${isActive ? 'CHO PHÉP' : 'ĐÃ KHÓA'}
+              </span>
+            </td>
+            <td style="font-size: 0.8rem; font-family: var(--font-mono);">${item.last_login || 'Chưa đăng nhập'}</td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-action-toggle" onclick="toggleEmail(${item.id})">
+                  ${isActive ? 'Khóa' : 'Mở'}
+                </button>
+                <button class="btn-action-del" onclick="deleteEmail(${item.id}, '${item.email}')">
+                  Xóa
+                </button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Nạp thông tin Google Form
+        const sysRes = await fetch("/api/system/status");
+        const sysData = await sysRes.json();
+        if (sysData.branch) {
+          document.getElementById("inputFormWorkIn").value = sysData.branch.google_form_work_in || "";
+          document.getElementById("inputFormWorkOut").value = sysData.branch.google_form_work_out || "";
+        }
+
+        if (window.lucide) lucide.createIcons();
+      } catch (err) {
+        console.error("Lỗi nạp danh sách email:", err);
+      }
+    }
+
+    // Thêm Email Cấp Phép Mới
+    document.getElementById("btnAddAllowedEmail").addEventListener("click", async () => {
+      const email = document.getElementById("newAllowedEmail").value.trim().toLowerCase();
+      const name = document.getElementById("newEmployeeName").value.trim();
+      const pass = document.getElementById("newEmployeePassword").value.trim();
+      const role = document.getElementById("newEmployeeRole").value.trim() || "NHÂN VIÊN";
+
+      if (!email || !email.includes("@")) {
+        showToast("Vui lòng nhập Email Google hợp lệ!");
+        return;
+      }
+      if (!name) {
+        showToast("Vui lòng nhập Họ Tên nhân viên!");
+        return;
+      }
+      if (!pass) {
+        showToast("Vui lòng đặt Mật khẩu cho nhân viên!");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/admin/allowed-emails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, employee_name: name, password: pass, role: role })
+        });
+        const result = await res.json();
+        if (res.ok) {
+          showToast(result.message);
+          document.getElementById("newAllowedEmail").value = "";
+          document.getElementById("newEmployeeName").value = "";
+          document.getElementById("newEmployeePassword").value = "";
+          document.getElementById("newEmployeeRole").value = "";
+          loadAdminData();
+        } else {
+          showToast(result.detail || "Không thể thêm email!");
+        }
+      } catch (err) {
+        showToast("Lỗi kết nối: " + err.message);
+      }
+    });
+
+
+    window.toggleEmail = async function(id) {
+      try {
+        const res = await fetch(`/api/admin/allowed-emails/${id}/toggle`, { method: "POST" });
+        const result = await res.json();
+        showToast(result.message);
+        loadAdminData();
+      } catch (err) {
+        showToast("Lỗi thao tác: " + err.message);
+      }
+    };
+
+    window.deleteEmail = async function(id, email) {
+      if (confirm(`Bạn có chắc chắn muốn xóa email ${email} khỏi danh sách cấp phép?`)) {
+        try {
+          const res = await fetch(`/api/admin/allowed-emails/${id}`, { method: "DELETE" });
+          const result = await res.json();
+          showToast(result.message);
+          loadAdminData();
+        } catch (err) {
+          showToast("Lỗi xóa: " + err.message);
+        }
+      }
+    };
+
+    // Lưu liên kết Google Form
+    document.getElementById("btnSaveGoogleForms").addEventListener("click", async () => {
+      const inUrl = document.getElementById("inputFormWorkIn").value.trim();
+      const outUrl = document.getElementById("inputFormWorkOut").value.trim();
+
+      try {
+        const res = await fetch("/api/admin/update-forms", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            branch_id: 1,
+            work_in_url: inUrl,
+            work_out_url: outUrl
+          })
+        });
+        const result = await res.json();
+        showToast(result.message);
+      } catch (err) {
+        showToast("Lỗi lưu Google Form: " + err.message);
+      }
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById("toastNotification");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3500);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) lucide.createIcons();
+      checkAdminAuth();
+    });
+  </script>
+</body>
+</html>
