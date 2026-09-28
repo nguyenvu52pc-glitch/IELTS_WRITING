@@ -3,1090 +3,606 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ Thống Chấm Công Doanh Nghiệp SaaS Pro</title>
-  <!-- Google Fonts -->
+  <title>Kiosk Điểm Danh & Chấm Công - Enterprise TimeClock SaaS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-/* =====================================================================
-   ENTERPRISE TIMECLOCK SAAS PRO - STYLESHEET (V3.7 FIX)
-   Sửa triệt để lỗi Iframe Google Form và tối ưu giao diện Kiosk
-   ===================================================================== */
-
-:root {
-  --bg-deep-black: #08090c;
-  --bg-surface: #101217;
-  --bg-card: #151820;
-  --bg-card-hover: #1c202b;
-
-  --primary-red: #e50914;
-  --primary-red-hover: #ff1e2b;
-  --red-crimson: #d32f2f;
-  --red-glow: rgba(229, 9, 20, 0.45);
-  --red-border: rgba(229, 9, 20, 0.4);
-
-  --accent-green: #00e676;
-  --green-glow: rgba(0, 230, 118, 0.4);
-
-  --text-pure-white: #ffffff;
-  --text-muted: #d6d9e0;
-  --text-dim: #7f8699;
-
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-highlight: rgba(229, 9, 20, 0.6);
-
-  --font-heading: 'Montserrat', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-
-  --radius-lg: 18px;
-  --radius-md: 10px;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: var(--font-heading);
-  background-color: var(--bg-deep-black);
-  color: var(--text-pure-white);
-  min-height: 100vh;
-  overflow-x: hidden;
-  position: relative;
-  user-select: none;
-}
-
-.bg-grid {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 45px 45px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glow-sphere {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(140px);
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.25;
-}
-
-.glow-left {
-  top: -120px; left: -100px;
-  width: 550px; height: 550px;
-  background: var(--primary-red);
-}
-
-.glow-right {
-  bottom: -150px; right: -120px;
-  width: 600px; height: 600px;
-  background: #7a0008;
-}
-
-.app-wrapper {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  padding: 24px 36px;
-  gap: 20px;
-}
-
-/* =====================================================================
-   HEADER SYSTEM BAR
-   ===================================================================== */
-.system-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background: rgba(16, 18, 23, 0.85);
-  border: 1px solid var(--border-light);
-  border-left: 4px solid var(--primary-red);
-  border-radius: var(--radius-md);
-  backdrop-filter: blur(14px);
-}
-
-.brand-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.brand-logo-box {
-  width: 48px; height: 48px;
-  background: linear-gradient(135deg, var(--primary-red), #800);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 15px var(--red-glow);
-}
-
-.brand-icon {
-  width: 26px; height: 26px;
-  color: #fff;
-}
-
-.brand-name {
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.system-subtitle {
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  font-weight: 500;
-}
-
-.system-status-group {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.license-status-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(229, 9, 20, 0.15);
-  border: 1px solid var(--primary-red);
-  color: #ff6b6b;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  font-family: var(--font-mono);
-}
-
-.license-status-tag svg {
-  width: 14px; height: 14px;
-}
-
-.security-status-tag {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0, 0, 0, 0.45);
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #c9cedd;
-  font-family: var(--font-mono);
-}
-
-.status-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent-green);
-  box-shadow: 0 0 10px var(--accent-green);
-  animation: pulseDot 2s infinite ease-in-out;
-}
-
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.8); }
-}
-
-.ctrl-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-light);
-  color: var(--text-muted);
-  width: 42px; height: 42px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.ctrl-btn:hover {
-  background: rgba(229, 9, 20, 0.2);
-  border-color: var(--primary-red);
-  color: #fff;
-  transform: translateY(-2px);
-}
-
-.ctrl-btn svg {
-  width: 20px; height: 20px;
-}
-
-/* =====================================================================
-   MAIN CONTAINER (SPLIT 48 / 52)
-   ===================================================================== */
-.main-container {
-  display: grid;
-  grid-template-columns: 48% 52%;
-  gap: 28px;
-  flex: 1;
-}
-
-.left-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.clock-card {
-  height: 100%;
-  background: linear-gradient(175deg, rgba(21, 24, 32, 0.95), rgba(10, 11, 15, 0.95));
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 36px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
-  position: relative;
-  overflow: hidden;
-}
-
-.clock-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 4px;
-  background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
-}
-
-.card-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  align-self: flex-start;
-  background: rgba(229, 9, 20, 0.12);
-  border: 1px solid var(--red-border);
-  color: #ff5252;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  padding: 6px 14px;
-  border-radius: 30px;
-}
-
-.badge-icon {
-  width: 15px; height: 15px;
-}
-
-.digital-clock-container {
-  margin: 20px 0 10px 0;
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-}
-
-.time-main {
-  font-family: var(--font-mono);
-  font-size: 4.8rem;
-  font-weight: 800;
-  color: var(--text-pure-white);
-  letter-spacing: 2px;
-  line-height: 1;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-}
-
-.time-digit {
-  display: inline-block;
-  min-width: 110px;
-  text-align: center;
-}
-
-.time-colon {
-  display: inline-block;
-  color: var(--primary-red);
-  animation: colonBlink 1s infinite;
-}
-
-@keyframes colonBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
-
-.highlight-red {
-  color: var(--primary-red);
-  text-shadow: 0 0 25px var(--red-glow);
-}
-
-.period-badge {
-  font-family: var(--font-mono);
-  font-size: 1.4rem;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 4px 10px;
-  border-radius: 6px;
-  color: #d1d5db;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.day-of-week {
-  font-size: 1.7rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 4px;
-}
-
-.full-date {
-  font-size: 1.1rem;
-  color: var(--text-dim);
-  font-weight: 500;
-}
-
-.clock-divider {
-  height: 1px;
-  background: linear-gradient(90deg, var(--border-light), transparent);
-  margin: 16px 0;
-}
-
-.security-sensor-box {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-md);
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.sensor-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #ff6b6b;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.sensor-title svg {
-  width: 15px; height: 15px;
-}
-
-.sensor-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-}
-
-.sensor-label {
-  color: var(--text-dim);
-}
-
-.sensor-val {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  color: #fff;
-}
-
-.sensor-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 4px;
-}
-
-.badge-green {
-  background: rgba(0, 230, 118, 0.15);
-  color: var(--accent-green);
-  border: 1px solid rgba(0, 230, 118, 0.4);
-}
-
-.badge-red {
-  background: rgba(229, 9, 20, 0.15);
-  color: #ff5252;
-  border: 1px solid rgba(229, 9, 20, 0.4);
-}
-
-.shift-info-box {
-  margin-top: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.info-label {
-  color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-}
-
-.info-label svg {
-  width: 16px; height: 16px;
-  color: var(--primary-red);
-}
-
-.red-tag {
-  background: rgba(229, 9, 20, 0.2);
-  border: 1px solid rgba(229, 9, 20, 0.5);
-  color: #ff6b6b;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-/* =====================================================================
-   CỘT PHẢI: WORK IN & WORK OUT
-   ===================================================================== */
-.right-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.remote-blocked-banner {
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.25), rgba(10, 10, 10, 0.9));
-  border: 2px solid var(--primary-red);
-  border-radius: var(--radius-md);
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  box-shadow: 0 0 25px rgba(229, 9, 20, 0.4);
-}
-
-.blocked-icon {
-  width: 44px; height: 44px;
-  color: #ff3344;
-  flex-shrink: 0;
-}
-
-.blocked-content h4 {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #ff5252;
-  margin-bottom: 4px;
-}
-
-.blocked-content p {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.action-card {
-  flex: 1;
-  position: relative;
-  background: var(--bg-card);
-  border: 2px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 32px 36px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-}
-
-.action-card:hover {
-  transform: translateY(-4px) scale(1.01);
-}
-
-.action-card:active {
-  transform: translateY(0) scale(0.99);
-}
-
-.action-card.disabled {
-  opacity: 0.4;
-  pointer-events: none;
-  filter: grayscale(80%);
-}
-
-.card-work-in {
-  background: linear-gradient(135deg, #1c1314 0%, #15171e 60%);
-  border-color: rgba(229, 9, 20, 0.4);
-}
-
-.card-work-in:hover {
-  border-color: var(--primary-red);
-  box-shadow: 0 0 25px var(--red-glow), 0 15px 35px rgba(0, 0, 0, 0.8);
-}
-
-.card-work-in .card-border-glow {
-  position: absolute;
-  top: 0; right: 0;
-  width: 250px; height: 250px;
-  background: radial-gradient(circle, rgba(229, 9, 20, 0.25) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.card-work-out {
-  background: linear-gradient(135deg, #161820 0%, #101115 60%);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.card-work-out:hover {
-  border-color: #ff3344;
-  box-shadow: 0 0 30px rgba(255, 51, 68, 0.25), 0 15px 35px rgba(0, 0, 0, 0.8);
-}
-
-.card-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
-  position: relative;
-  z-index: 2;
-}
-
-.card-top-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.action-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  padding: 5px 12px;
-  border-radius: 6px;
-}
-
-.in-badge {
-  background: var(--primary-red);
-  color: #fff;
-  box-shadow: 0 2px 10px var(--red-glow);
-}
-
-.out-badge {
-  background: #2a2e39;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ff6b6b;
-}
-
-.shortcut-hint {
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  font-family: var(--font-mono);
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px 10px;
-  border-radius: 4px;
-}
-
-.card-hero {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-}
-
-.action-icon-circle {
-  width: 68px; height: 68px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.3s;
-}
-
-.action-card:hover .action-icon-circle {
-  transform: scale(1.08) rotate(-3deg);
-}
-
-.in-circle {
-  background: linear-gradient(135deg, var(--primary-red), #9c050d);
-  color: #fff;
-  box-shadow: 0 6px 20px var(--red-glow);
-}
-
-.out-circle {
-  background: linear-gradient(135deg, #2b303c, #161820);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ff4757;
-}
-
-.action-icon-circle svg {
-  width: 34px; height: 34px;
-}
-
-.action-title {
-  font-size: 2.3rem;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  line-height: 1.1;
-}
-
-.action-sub-vi {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--primary-red);
-  letter-spacing: 1px;
-  margin-top: 4px;
-}
-
-.card-work-out .action-sub-vi {
-  color: #ff6b6b;
-}
-
-.action-desc {
-  font-size: 0.95rem;
-  color: var(--text-dim);
-  line-height: 1.5;
-  max-width: 90%;
-}
-
-.action-footer {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: all 0.25s;
-}
-
-.action-card:hover .btn-cta {
-  background: var(--primary-red);
-  border-color: var(--primary-red);
-  color: #fff;
-  box-shadow: 0 4px 15px var(--red-glow);
-}
-
-.action-card:hover .btn-cta svg {
-  transform: translateX(5px);
-}
-
-/* =====================================================================
-   PAYWALL OVERLAY
-   ===================================================================== */
-.paywall-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(6, 7, 10, 0.95);
-  backdrop-filter: blur(25px);
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
-  overflow-y: auto;
-}
-
-.paywall-card {
-  max-width: 800px;
-  width: 100%;
-  background: #11141c;
-  border: 2px solid var(--primary-red);
-  border-radius: 24px;
-  padding: 44px;
-  box-shadow: 0 0 50px rgba(229, 9, 20, 0.35);
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  text-align: center;
-}
-
-.paywall-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  align-self: center;
-  background: rgba(229, 9, 20, 0.2);
-  color: #ff5252;
-  border: 1px solid var(--primary-red);
-  padding: 8px 18px;
-  border-radius: 30px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-}
-
-.paywall-title {
-  font-size: 2rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-}
-
-.paywall-desc {
-  max-width: 650px;
-  margin: 0 auto;
-  font-size: 1rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.license-quick-unlock {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-}
-
-.license-input-wrapper {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-}
-
-.license-input-wrapper input {
-  flex: 1;
-  background: #090a0e;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  padding: 14px 18px;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  color: #fff;
-  outline: none;
-}
-
-.license-input-wrapper input:focus {
-  border-color: var(--primary-red);
-}
-
-.btn-activate {
-  background: var(--primary-red);
-  color: #fff;
-  border: none;
-  padding: 0 26px;
-  border-radius: 8px;
-  font-weight: 800;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.2s;
-}
-
-.btn-activate:hover {
-  background: var(--primary-red-hover);
-}
-
-/* =====================================================================
-   CỬA SỔ POPUP GOOGLE FORM (FULL-BLEED IFRAME SỬA TRIỆT ĐỂ)
-   ===================================================================== */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(14px);
-  z-index: 1000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.modal-overlay.active {
-  display: flex;
-}
-
-.modal-wrapper {
-  background: #151821;
-  border: 2px solid var(--border-light);
-  border-radius: 18px;
-  width: 92vw;
-  max-width: 1100px;
-  height: 90vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px var(--red-glow);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 24px;
-  background: #0f1118;
-  border-bottom: 1px solid var(--border-light);
-  flex-shrink: 0;
-  gap: 16px;
-  min-height: 62px;
-}
-
-.modal-title-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  flex: 1;
-}
-
-.modal-indicator {
-  background: var(--primary-red);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 5px;
-  flex-shrink: 0;
-}
-
-.modal-heading {
-  font-size: 1.1rem;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #fff;
-}
-
-.modal-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.modal-btn-sub {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-light);
-  color: var(--text-muted);
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.modal-btn-sub:hover {
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
-}
-
-.modal-btn-sub svg {
-  width: 15px; height: 15px;
-}
-
-.modal-btn-close {
-  background: rgba(229, 9, 20, 0.15);
-  border: 1px solid rgba(229, 9, 20, 0.35);
-  color: #ff5252;
-  width: 38px; height: 38px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.modal-btn-close:hover {
-  background: var(--primary-red);
-  color: #fff;
-}
-
-/* THÂN CỬA SỔ VÀ IFRAME FULL 100% */
-.modal-body {
-  flex: 1;
-  width: 100%;
-  height: calc(100% - 62px);
-  position: relative;
-  background: #ffffff;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-}
-
-.modal-body iframe {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  border: none !important;
-  display: block !important;
-  background: #ffffff !important;
-}
-
-.iframe-loader {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: #141720;
-  color: var(--text-dim);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  z-index: 10;
-  transition: opacity 0.3s;
-}
-
-.spinner {
-  width: 44px; height: 44px;
-  border: 4px solid rgba(229, 9, 20, 0.2);
-  border-top-color: var(--primary-red);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #181b24;
-  border: 1px solid var(--primary-red);
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 25px var(--red-glow);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-  z-index: 2000;
-}
-
-.toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
-.system-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 24px;
-  background: rgba(18, 20, 26, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-md);
-  font-size: 0.8rem;
-  color: var(--text-dim);
-}
-
-.footer-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-}
-
-.footer-icon {
-  width: 15px; height: 15px;
-  color: var(--primary-red);
-}
-
-@media (max-width: 1024px) {
-  .main-container {
-    grid-template-columns: 1fr;
-  }
-}
-
-</style>
-  <style>
-    /* Màn hình khóa đăng nhập Email + Mật khẩu */
-    .login-auth-overlay {
+    :root {
+      --bg-deep-black: #08090c;
+      --bg-surface: #101217;
+      --bg-card: #151820;
+      --bg-card-hover: #1c202b;
+      --bg-input: #0a0c10;
+      --primary-red: #e50914;
+      --primary-red-hover: #ff1e2b;
+      --red-glow: rgba(229, 9, 20, 0.45);
+      --accent-green: #00e676;
+      --green-glow: rgba(0, 230, 118, 0.4);
+      --text-pure-white: #ffffff;
+      --text-muted: #d6d9e0;
+      --text-dim: #7f8699;
+      --border-light: rgba(255, 255, 255, 0.08);
+      --font-heading: 'Montserrat', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-lg: 18px;
+      --radius-md: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-heading);
+      background-color: var(--bg-deep-black);
+      color: var(--text-pure-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      user-select: none;
+    }
+
+    .bg-grid {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 45px 45px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-sphere {
+      position: fixed; border-radius: 50%; filter: blur(140px); pointer-events: none; z-index: 0; opacity: 0.25;
+    }
+    .glow-left { top: -120px; left: -100px; width: 550px; height: 550px; background: var(--primary-red); }
+    .glow-right { bottom: -150px; right: -120px; width: 600px; height: 600px; background: #7a0008; }
+
+    /* =====================================================================
+       MÀN HÌNH KHÓA BẢN QUYỀN (KHI BỊ SUPER ADMIN KHÓA)
+       ===================================================================== */
+    .license-locked-overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: rgba(8, 9, 12, 0.95);
-      backdrop-filter: blur(20px);
-      z-index: 5000;
-      display: flex;
+      background: rgba(7, 8, 12, 0.98);
+      backdrop-filter: blur(16px);
+      z-index: 10000;
+      display: none;
       align-items: center;
       justify-content: center;
       padding: 24px;
     }
-    .login-card {
-      max-width: 480px;
-      width: 100%;
-      background: #12151e;
+
+    .lock-box {
+      background: #141722;
       border: 2px solid var(--primary-red);
-      border-radius: 20px;
-      padding: 38px;
-      box-shadow: 0 0 50px rgba(229, 9, 20, 0.4);
+      border-radius: 22px;
+      padding: 48px;
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 70px rgba(229, 9, 20, 0.5);
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      text-align: center;
+      gap: 20px;
     }
-    .brand-circle-icon {
-      width: 58px; height: 58px;
-      background: linear-gradient(135deg, var(--primary-red), #800);
+
+    .lock-icon-circle {
+      width: 80px; height: 80px;
+      background: rgba(229, 9, 20, 0.15);
+      border: 2px solid var(--primary-red);
       border-radius: 50%;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+      color: #ff5252;
+      animation: pulseRed 2s infinite;
     }
+
+    @keyframes pulseRed {
+      0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.6); }
+      70% { box-shadow: 0 0 0 20px rgba(229, 9, 20, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
+    }
+
+    /* =====================================================================
+       MÀN HÌNH ĐĂNG NHẬP MỞ CA CHO QUẢN LÝ (MANAGER LOGIN)
+       ===================================================================== */
+    .manager-auth-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(7, 8, 12, 0.92);
+      backdrop-filter: blur(14px);
+      z-index: 9000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .login-card .brand-icon-box {
+      width: 60px; height: 60px;
+      background: rgba(229, 9, 20, 0.15);
+      border: 1.5px solid var(--primary-red);
+      border-radius: 50%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff5252;
+    }
+
     .input-field {
-      background: #090a0e;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
+      width: 100%;
+      background: var(--bg-input);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
       padding: 13px 16px;
       color: #fff;
       font-size: 0.95rem;
       outline: none;
-      width: 100%;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
     }
+
     .input-field:focus {
       border-color: var(--primary-red);
+      background: #0e121a;
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
     }
-    /* Thanh hiển thị Xin chào + Tên trên thanh tác vụ */
-    .welcome-user-tag {
+
+    /* BUTTONS */
+    .plan-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease;
+      color: #fff;
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg, var(--primary-red) 0%, #b8050e 100%);
+      color: #fff !important;
+      box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4);
+    }
+
+    .btn-red:hover {
+      background: var(--primary-red-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(229, 9, 20, 0.65);
+    }
+
+    /* =====================================================================
+       GIAO DIỆN CHÍNH KIOSK
+       ===================================================================== */
+    .app-wrapper {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px 36px;
+      gap: 20px;
+    }
+
+    .system-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: rgba(16, 18, 23, 0.9);
+      border: 1px solid var(--border-light);
+      border-left: 5px solid var(--primary-red);
+      border-radius: var(--radius-md);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo-box {
+      width: 44px; height: 44px;
+      background: var(--primary-red);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 0 20px var(--red-glow);
+    }
+
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .system-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .system-status-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .manager-user-tag {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: linear-gradient(135deg, rgba(229, 9, 20, 0.2), rgba(0, 0, 0, 0.6));
-      border: 1px solid var(--primary-red);
-      color: #ffffff;
-      padding: 8px 18px;
+      background: rgba(0, 230, 118, 0.12);
+      border: 1px solid rgba(0, 230, 118, 0.35);
+      color: var(--accent-green);
+      padding: 8px 16px;
       border-radius: 20px;
-      font-size: 0.9rem;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .ctrl-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .btn-director {
+      background: rgba(229, 9, 20, 0.15);
+      border-color: rgba(229, 9, 20, 0.4);
+      color: #ff6b6b;
+    }
+
+    .btn-director:hover {
+      background: var(--primary-red);
+      color: #fff;
+    }
+
+    /* MAIN CONTAINER */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 38% 62%;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-container { grid-template-columns: 1fr; }
+    }
+
+    /* LEFT PANEL: ATOMIC CLOCK */
+    .clock-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(229, 9, 20, 0.15);
+      border: 1px solid rgba(229, 9, 20, 0.3);
+      color: #ff6b6b;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: 0.5px;
+      width: fit-content;
     }
-    .welcome-user-tag svg {
-      width: 16px; height: 16px;
+
+    .digital-clock-container {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .time-main {
+      font-family: var(--font-mono);
+      font-size: 4.2rem;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .highlight-red { color: var(--primary-red); text-shadow: 0 0 30px var(--red-glow); }
+    .period-badge {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 800;
       color: var(--accent-green);
     }
+
+    .date-container {
+      border-left: 3px solid var(--primary-red);
+      padding-left: 14px;
+    }
+
+    .day-of-week { font-size: 1.15rem; font-weight: 900; color: #fff; }
+    .full-date { font-size: 0.88rem; color: var(--text-dim); margin-top: 3px; }
+
+    /* RIGHT PANEL: WORK IN & WORK OUT CARDS */
+    .right-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .right-panel { grid-template-columns: 1fr; }
+    }
+
+    .action-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .action-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-work-in:hover { border-color: var(--primary-red); box-shadow: 0 0 35px rgba(229, 9, 20, 0.35); }
+    .card-work-out:hover { border-color: #ff3344; box-shadow: 0 0 35px rgba(255, 51, 68, 0.35); }
+
+    .action-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .in-badge { background: rgba(229, 9, 20, 0.2); color: #ff6b6b; border: 1px solid rgba(229, 9, 20, 0.4); }
+    .out-badge { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid var(--border-light); }
+
+    .action-icon-circle {
+      width: 60px; height: 60px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0 16px 0;
+      font-size: 1.5rem;
+    }
+
+    .in-circle { background: linear-gradient(135deg, var(--primary-red) 0%, #800008 100%); color: #fff; }
+    .out-circle { background: linear-gradient(135deg, #2b3040 0%, #151822 100%); color: #ff5252; border: 1px solid var(--border-light); }
+
+    .action-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; }
+    .action-sub-vi { font-size: 0.88rem; color: var(--text-dim); margin-top: 4px; }
+    .action-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin: 14px 0 20px 0; }
+
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    .action-card:hover .btn-cta { background: var(--primary-red); border-color: var(--primary-red); }
+
+    /* =====================================================================
+       FULL-BLEED GOOGLE FORM MODAL (100%)
+       ===================================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(14px);
+      z-index: 8000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-wrapper {
+      background: #11141c;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      width: 96vw;
+      height: 94vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #0b0d13;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .modal-body {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 56px);
+      position: relative;
+    }
+
+    .modal-body iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
+      background: #fff;
+    }
+
+    /* =====================================================================
+       MODAL CÀI ĐẶT DÀNH CHO GIÁM ĐỐC (DIRECTOR CONSOLE)
+       ===================================================================== */
+    .director-modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(16px);
+      z-index: 9500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .director-modal-card {
+      background: #12151e;
+      border: 1.5px solid rgba(229, 9, 20, 0.4);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 70px rgba(229, 9, 20, 0.35);
+    }
+
+    .director-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      background: #0b0d14;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 10px;
+      padding: 12px 24px;
+      background: #0f121a;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.86rem;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-red);
+      color: #fff;
+    }
+
+    .tab-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .tab-content.active { display: flex; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: #181b26;
+      border-left: 4px solid var(--primary-red);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 12000;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
   </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1095,89 +611,106 @@ body {
   <div class="glow-sphere glow-right"></div>
 
   <!-- ===================================================================
-       1. CỔNG ĐĂNG NHẬP EMAIL & MẬT KHẨU BẢO MẬT (SERVER AUTH)
+       1. MÀN HÌNH KHÓA BẢN QUYỀN (HIỆN KHI BỊ SUPER ADMIN KHÓA)
        =================================================================== -->
-  <div id="loginAuthOverlay" class="login-auth-overlay" style="display: flex;">
-    <div class="login-card">
-      <div class="brand-circle-icon">
-        <i data-lucide="shield-check" style="width: 30px; height: 30px;"></i>
+  <div id="licenseLockedOverlay" class="license-locked-overlay">
+    <div class="lock-box">
+      <div class="lock-icon-circle"><i data-lucide="shield-alert" style="width: 44px; height: 44px;"></i></div>
+      <h2 style="font-size: 1.55rem; font-weight: 900; color: #ff5252;">HỆ THỐNG TẠM NGƯNG BẢN QUYỀN</h2>
+      <div style="font-size: 1rem; font-weight: 700; color: #fff;" id="lockedCompanyName">DOANH NGHIỆP</div>
+      <p style="font-size: 0.88rem; color: var(--text-dim); line-height: 1.6;" id="lockedReasonText">
+        Bản quyền phần mềm của công ty đã bị tạm khóa hoặc hết hạn. Vui lòng liên hệ nhà cung cấp phần mềm SaaS để gia hạn và kích hoạt lại.
+      </p>
+      <div style="font-size: 0.8rem; font-family: var(--font-mono); color: #8ab4f8; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px;">
+        Mã Doanh Nghiệp (Tenant): <span id="lockedTenantDisplay">...</span>
       </div>
-
-      <div>
-        <h2 style="font-size: 1.45rem; font-weight: 900; margin-bottom: 6px;">ĐĂNG NHẬP ĐIỂM DANH</h2>
-        <p style="font-size: 0.88rem; color: var(--text-dim); line-height: 1.4;">
-          Vui lòng nhập Email và Mật khẩu được cấp để truy cập hệ thống Kiosk:
-        </p>
-      </div>
-
-      <!-- Ô nhập Email & Mật khẩu -->
-      <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
-        <div>
-          <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 6px;">Email nhân viên (*):</label>
-          <input type="email" id="inputLoginEmail" class="input-field" placeholder="tennhanvien@gmail.com" autocomplete="off">
-        </div>
-        <div>
-          <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 6px;">Mật khẩu (*):</label>
-          <input type="password" id="inputLoginPassword" class="input-field" placeholder="Nhập mật khẩu..." autocomplete="off">
-        </div>
-      </div>
-
-      <button id="btnLoginSubmit" class="plan-btn btn-red" style="padding: 13px; font-size: 0.95rem; font-weight: 800;">
-        <i data-lucide="log-in"></i> ĐĂNG NHẬP VÀO CA
-      </button>
     </div>
   </div>
 
   <!-- ===================================================================
-       2. GIAO DIỆN CHÍNH KIOSK CHẤM CÔNG
+       2. MÀN HÌNH ĐĂNG NHẬP MỞ CA CHO QUẢN LÝ (MANAGER LOGIN)
        =================================================================== -->
-  <div class="app-wrapper">
+  <div id="managerLoginOverlay" class="manager-auth-overlay">
+    <div class="login-card">
+      <div class="brand-icon-box"><i data-lucide="user-check" style="width: 32px; height: 32px;"></i></div>
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 900;">ĐĂNG NHẬP MỞ CA KIOSK</h2>
+        <div style="font-size: 0.85rem; color: #ff6b6b; font-weight: 700; margin-top: 4px;" id="loginStoreNameTitle">...</div>
+        <p style="font-size: 0.82rem; color: var(--text-dim); margin-top: 4px;">
+          Dành cho Quản Lý cửa hàng mở ca để nhân viên bấm chấm công:
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Tên Đăng Nhập Quản Lý (*):</label>
+          <input type="text" id="inputManagerUsername" class="input-field" placeholder="quanly01" autocomplete="off">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Mật Khẩu Quản Lý (*):</label>
+          <input type="password" id="inputManagerPassword" class="input-field" placeholder="Nhập mật khẩu..." autocomplete="off">
+        </div>
+      </div>
+
+      <button id="btnManagerLoginSubmit" class="plan-btn btn-red" style="padding: 13px;">
+        <i data-lucide="log-in"></i> MỞ CA CHẤM CÔNG
+      </button>
+
+      <div style="margin-top: 4px;">
+        <button id="btnOpenDirectorFromLogin" class="ctrl-btn btn-director" style="width: 100%; justify-content: center; font-size: 0.78rem;">
+          <i data-lucide="settings"></i> Cài Đặt (Dành Cho Giám Đốc)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       3. GIAO DIỆN CHÍNH KIOSK CHẤM CÔNG
+       =================================================================== -->
+  <div class="app-wrapper" id="kioskMainWrapper">
     <!-- Top System Bar -->
     <header class="system-header">
       <div class="brand-section">
-        <div class="brand-logo-box">
-          <i data-lucide="layers" class="brand-icon"></i>
-        </div>
-        <div class="brand-meta">
-          <h1 class="brand-name" id="displayStoreName">HỆ THỐNG ĐIỀU HÀNH CHUỖI</h1>
+        <div class="brand-logo-box"><i data-lucide="layers"></i></div>
+        <div>
+          <h1 class="brand-name" id="displayStoreName">DOANH NGHIỆP</h1>
           <span class="system-subtitle" id="displayBranchName">Cổng Điểm Danh & Chấm Công Chuỗi</span>
         </div>
       </div>
 
       <div class="system-status-group">
-        <!-- CHỈ HIỂN THỊ "XIN CHÀO + TÊN" TRÊN THANH TÁC VỤ (GIẤU HOÀN TOÀN EMAIL) -->
-        <div class="welcome-user-tag" id="welcomeUserTag">
-          <i data-lucide="user-check"></i>
-          <span id="headerGreetingText">Xin chào Nhân Viên</span>
+        <div class="manager-user-tag" id="managerTag">
+          <i data-lucide="shield-check"></i>
+          <span id="headerGreetingText">Quản lý: Đang tải...</span>
         </div>
 
-        <button id="btnLogoutUser" class="ctrl-btn" title="Đăng xuất đổi ca" style="width: auto; padding: 0 14px; gap: 6px; font-size: 0.8rem; font-weight: 700;">
-          <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> Đổi Ca
+        <button id="btnChangeShift" class="ctrl-btn" title="Đăng xuất đổi ca">
+          <i data-lucide="log-out"></i> Đổi Ca
         </button>
 
-        <button id="btnFullscreen" class="ctrl-btn" title="Toàn màn hình (F11)">
-          <i data-lucide="maximize" id="fullscreenIcon"></i>
+        <button id="btnOpenDirectorModal" class="ctrl-btn btn-director" title="Mở trang cài đặt Giám Đốc">
+          <i data-lucide="settings"></i> Cài Đặt (Giám Đốc)
+        </button>
+
+        <button id="btnFullscreen" class="ctrl-btn" title="Toàn màn hình">
+          <i data-lucide="maximize"></i>
         </button>
       </div>
     </header>
 
     <!-- Main Workspace -->
     <main class="main-container">
-      <!-- CỘT TRÁI: ĐỒNG HỒ NGUYÊN TỬ SERVER TIME -->
+      <!-- CỘT TRÁI: ĐỒNG HỒ NGUYÊN TỬ -->
       <section class="left-panel">
         <div class="clock-card">
           <div class="card-badge">
-            <i data-lucide="server" class="badge-icon"></i>
-            <span>ĐỒNG BỘ THỜI GIAN NGUYÊN TỬ (SERVER TIME)</span>
+            <i data-lucide="server"></i>
+            <span>ĐỒNG BỘ THỜI GIAN THỰC (SERVER TIME)</span>
           </div>
 
           <div class="digital-clock-container">
             <div class="time-main">
-              <span id="hours" class="time-digit">00</span>
-              <span class="time-colon">:</span>
-              <span id="minutes" class="time-digit">00</span>
-              <span class="time-colon">:</span>
-              <span id="seconds" class="time-digit highlight-red">00</span>
+              <span id="hours">00</span><span class="time-colon">:</span><span id="minutes">00</span><span class="time-colon">:</span><span id="seconds" class="highlight-red">00</span>
             </div>
             <div class="period-badge" id="ampm">AM</div>
           </div>
@@ -1187,419 +720,608 @@ body {
             <div class="full-date" id="fullDate">Đang kết nối thời gian thực...</div>
           </div>
 
-          <div class="clock-divider"></div>
-
-          <!-- Thông tin nhân sự trực ca (GIẤU KÍN EMAIL) -->
-          <div class="security-sensor-box">
-            <div class="sensor-title" style="color: #ff6b6b;">
-              <i data-lucide="badge-check"></i> NHÂN SỰ ĐANG TRỰC CA
+          <div style="border-top: 1px solid var(--border-light); padding-top: 16px;">
+            <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">
+              Quản lý trực ca hiện tại:
             </div>
-            <div class="sensor-row">
-              <span class="sensor-label">Họ và Tên:</span>
-              <span class="sensor-val" id="dispUserName" style="color: #fff; font-size: 1rem;">Đang tải...</span>
-              <span class="sensor-badge badge-green"><i data-lucide="check"></i> HỢP LỆ</span>
-            </div>
-            <div class="sensor-row">
-              <span class="sensor-label">Vị trí chức vụ:</span>
-              <span class="sensor-val" id="dispUserRole" style="color: #8ab4f8;">---</span>
-            </div>
-          </div>
-
-          <div class="shift-info-box">
-            <div class="info-row">
-              <span class="info-label"><i data-lucide="clock-4"></i> Ca làm việc:</span>
-              <span class="info-value red-tag" id="currentShiftText">Ca Sáng (06:00 - 14:00)</span>
-            </div>
+            <div style="font-size: 1rem; font-weight: 800; color: #fff;" id="dispManagerName">...</div>
+            <div style="font-size: 0.8rem; color: #8ab4f8;" id="dispManagerRole">...</div>
           </div>
         </div>
       </section>
 
-      <!-- CỘT PHẢI: WORK IN & WORK OUT MỞ GOOGLE FORM -->
+      <!-- CỘT PHẢI: WORK IN & WORK OUT -->
       <section class="right-panel">
-        <!-- NÚT 1: WORK IN -->
-        <div class="action-card card-work-in" id="cardWorkIn" onclick="handleOpenGoogleForm('WORK_IN')">
-          <div class="card-border-glow"></div>
-          <div class="card-content">
-            <div class="card-top-meta">
-              <span class="action-badge in-badge"><i data-lucide="arrow-down-left"></i> CHECK-IN</span>
-              <span class="shortcut-hint">Phím [ I ]</span>
-            </div>
-            <div class="card-hero">
-              <div class="action-icon-circle in-circle"><i data-lucide="log-in"></i></div>
-              <div class="action-title-group">
-                <h2 class="action-title">WORK IN</h2>
-                <h3 class="action-sub-vi">VÀO CA LÀM VIỆC</h3>
-              </div>
-            </div>
-            <p class="action-desc">
-              Mở Biểu mẫu Google Form ghi nhận giờ đến, chấm công vào ca và đồng bộ trực tiếp về Google Sheets của quản lý.
-            </p>
-            <div class="action-footer">
-              <span class="btn-cta"><span>Mở Google Form Vào Ca</span> <i data-lucide="arrow-right"></i></span>
-            </div>
+        <div class="action-card card-work-in" onclick="openForm('WORK_IN')">
+          <div style="display: flex; justify-content: space-between;">
+            <span class="action-badge in-badge"><i data-lucide="arrow-down-left"></i> CHECK-IN</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);">Phím [ I ]</span>
           </div>
+          <div class="action-icon-circle in-circle"><i data-lucide="log-in"></i></div>
+          <div>
+            <h2 class="action-title">WORK IN</h2>
+            <h3 class="action-sub-vi">VÀO CA LÀM VIỆC</h3>
+          </div>
+          <p class="action-desc">Mở Biểu mẫu Google Form ghi nhận giờ đến, chấm công vào ca và đồng bộ trực tiếp về Google Sheets của quản lý.</p>
+          <div class="btn-cta"><span>Mở Google Form Vào Ca</span> <i data-lucide="arrow-right"></i></div>
         </div>
 
-        <!-- NÚT 2: WORK OUT -->
-        <div class="action-card card-work-out" id="cardWorkOut" onclick="handleOpenGoogleForm('WORK_OUT')">
-          <div class="card-border-glow"></div>
-          <div class="card-content">
-            <div class="card-top-meta">
-              <span class="action-badge out-badge"><i data-lucide="arrow-up-right"></i> CHECK-OUT</span>
-              <span class="shortcut-hint">Phím [ O ]</span>
-            </div>
-            <div class="card-hero">
-              <div class="action-icon-circle out-circle"><i data-lucide="log-out"></i></div>
-              <div class="action-title-group">
-                <h2 class="action-title">WORK OUT</h2>
-                <h3 class="action-sub-vi">KẾT THÚC CA (TAN CA)</h3>
-              </div>
-            </div>
-            <p class="action-desc">
-              Mở Biểu mẫu Google Form báo cáo doanh số, bàn giao hàng tồn và xác nhận kết thúc ca làm việc.
-            </p>
-            <div class="action-footer">
-              <span class="btn-cta"><span>Mở Google Form Tan Ca</span> <i data-lucide="arrow-right"></i></span>
-            </div>
+        <div class="action-card card-work-out" onclick="openForm('WORK_OUT')">
+          <div style="display: flex; justify-content: space-between;">
+            <span class="action-badge out-badge"><i data-lucide="arrow-up-right"></i> CHECK-OUT</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);">Phím [ O ]</span>
           </div>
+          <div class="action-icon-circle out-circle"><i data-lucide="log-out"></i></div>
+          <div>
+            <h2 class="action-title">WORK OUT</h2>
+            <h3 class="action-sub-vi">KẾT THÚC CA (TAN CA)</h3>
+          </div>
+          <p class="action-desc">Mở Biểu mẫu Google Form báo cáo doanh số, bàn giao hàng tồn và xác nhận kết thúc ca làm việc.</p>
+          <div class="btn-cta"><span>Mở Google Form Tan Ca</span> <i data-lucide="arrow-right"></i></div>
         </div>
       </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="system-footer">
-      <div class="footer-left">
-        <i data-lucide="cpu" class="footer-icon"></i>
-        <span>TIMECLOCK SAAS PRO • HỆ THỐNG ĐIỂM DANH BẢO MẬT DOANH NGHIỆP</span>
-      </div>
-      <div class="footer-right">
-        <span>Bảo mật hạ tầng đám mây</span>
-      </div>
-    </footer>
   </div>
 
   <!-- ===================================================================
-       3. CỬA SỔ POPUP NHÚNG GOOGLE FORM (FULL 100%)
+       4. CỬA SỔ GOOGLE FORM FULL SCREEN (POPUP 100%)
        =================================================================== -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-wrapper">
       <div class="modal-header">
-        <div class="modal-title-group">
-          <span class="modal-indicator" id="modalTag">WORK IN</span>
-          <h3 id="modalHeading" class="modal-heading">Biểu Mẫu Google Form Điểm Danh</h3>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="action-badge in-badge" id="modalTag">WORK IN</span>
+          <h3 id="modalHeading" style="font-size: 1.05rem; font-weight: 800;">Biểu Mẫu Google Form Điểm Danh</h3>
         </div>
-        <div class="modal-controls">
-          <button id="btnOpenNewTab" class="modal-btn-sub" title="Mở biểu mẫu trong tab mới">
-            <i data-lucide="external-link"></i> Mở tab mới
-          </button>
-          <button id="btnCloseModal" class="modal-btn-close" title="Đóng cửa sổ">
-            <i data-lucide="x"></i>
-          </button>
+        <div style="display: flex; gap: 8px;">
+          <button id="btnOpenNewTab" class="ctrl-btn" title="Mở trong tab mới"><i data-lucide="external-link"></i> Mở tab mới</button>
+          <button id="btnCloseModal" class="ctrl-btn" style="background: rgba(229,9,20,0.2); color: #ff5252;"><i data-lucide="x"></i> Đóng</button>
         </div>
       </div>
       <div class="modal-body">
-        <div class="iframe-loader" id="iframeLoader">
-          <div class="spinner"></div>
-          <p>Đang tải Google Form của doanh nghiệp...</p>
-        </div>
-        <iframe id="googleFormIframe" src="" frameborder="0" marginheight="0" marginwidth="0">Đang tải biểu mẫu...</iframe>
+        <iframe id="googleFormIframe" src="" frameborder="0">Đang nạp form...</iframe>
       </div>
     </div>
   </div>
 
-  <!-- TOAST -->
-  <div id="toastNotification" class="toast">Thông báo hệ thống</div>
+  <!-- ===================================================================
+       5. MODAL CÀI ĐẶT CỦA GIÁM ĐỐC (DIRECTOR CONSOLE)
+       =================================================================== -->
+  <div id="directorModal" class="director-modal-overlay">
+    <!-- Khung nhập pass giám đốc (nếu chưa xác thực) -->
+    <div id="directorAuthCard" class="login-card" style="display: flex;">
+      <div class="brand-icon-box"><i data-lucide="lock" style="width: 30px; height: 30px;"></i></div>
+      <h2>XÁC THỰC GIÁM ĐỐC</h2>
+      <p style="font-size: 0.82rem; color: var(--text-dim);">Vui lòng nhập mật khẩu Giám Đốc để mở giao diện cài đặt cơ sở & nhân sự:</p>
+      <input type="password" id="inputDirectorPass" class="input-field" placeholder="Mật khẩu Giám Đốc..." autocomplete="off">
+      <div style="display: flex; gap: 10px;">
+        <button id="btnDirectorSubmit" class="plan-btn btn-red" style="flex: 1;"><i data-lucide="unlock"></i> Xác Thực</button>
+        <button id="btnCancelDirectorAuth" class="ctrl-btn" style="padding: 10px 16px;">Hủy</button>
+      </div>
+    </div>
 
-  <!-- Kiosk Logic -->
+    <!-- Khung giao diện quản trị của Giám Đốc sau khi xác thực thành công -->
+    <div id="directorDashboardCard" class="director-modal-card" style="display: none;">
+      <div class="director-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i data-lucide="briefcase" style="color: var(--primary-red);"></i>
+          <h3 style="font-size: 1.15rem; font-weight: 900;">BẢNG ĐIỀU HÀNH DÀNH CHO GIÁM ĐỐC</h3>
+        </div>
+        <button id="btnCloseDirectorConsole" class="ctrl-btn"><i data-lucide="x"></i> Đóng</button>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchDirectorTab('tabForms')"><i data-lucide="store"></i> Thông Tin & Google Form</button>
+        <button class="tab-btn" onclick="switchDirectorTab('tabManagers')"><i data-lucide="users"></i> Tài Khoản Quản Lý</button>
+        <button class="tab-btn" onclick="switchDirectorTab('tabSecurity')"><i data-lucide="key"></i> Đổi Mật Khẩu Giám Đốc</button>
+      </div>
+
+      <!-- Tab 1: Cấu hình cơ sở & Google Form -->
+      <div id="tabForms" class="tab-content active">
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Tên Doanh Nghiệp (*):</label>
+          <input type="text" id="dirInputCompanyName" class="input-field" placeholder="Tên công ty...">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Tên Chi Nhánh / Cơ Sở (*):</label>
+          <input type="text" id="dirInputBranchName" class="input-field" placeholder="Ví dụ: THE COFFEE HOUSE - CHI NHÁNH 1">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Mô Tả Phụ Đề Cơ Sở:</label>
+          <input type="text" id="dirInputBranchCode" class="input-field" placeholder="Cổng Điểm Danh Chi Nhánh 1">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">URL Google Form "WORK IN" (Vào Ca):</label>
+          <input type="url" id="dirInputWorkIn" class="input-field" placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">URL Google Form "WORK OUT" (Tan Ca):</label>
+          <input type="url" id="dirInputWorkOut" class="input-field" placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true">
+        </div>
+        <button id="btnDirectorSaveForms" class="plan-btn btn-red" style="margin-top: 8px;">
+          <i data-lucide="save"></i> LƯU THÔNG TIN CƠ SỞ & BIỂU MẪU
+        </button>
+      </div>
+
+      <!-- Tab 2: Quản lý Quản Lý Ca -->
+      <div id="tabManagers" class="tab-content">
+        <!-- Form thêm Quản lý mới -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-weight: 800; color: #fff; font-size: 0.95rem;"><i data-lucide="user-plus"></i> Cấp Tài Khoản Cho Quản Lý Mới</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <input type="text" id="newMgrUsername" class="input-field" placeholder="Tên đăng nhập (Ví dụ: quanly02)">
+            <input type="text" id="newMgrFullName" class="input-field" placeholder="Họ và tên Quản Lý">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <input type="password" id="newMgrPassword" class="input-field" placeholder="Mật khẩu Quản Lý...">
+            <input type="text" id="newMgrRole" class="input-field" placeholder="Chức vụ (Ví dụ: Quản Lý Ca Sáng)">
+          </div>
+          <button id="btnDirectorAddManager" class="plan-btn btn-red" style="width: fit-content; padding: 10px 18px;">
+            <i data-lucide="plus"></i> Tạo Tài Khoản Quản Lý
+          </button>
+        </div>
+
+        <!-- Bảng danh sách Quản lý -->
+        <div style="overflow-x: auto; border: 1px solid var(--border-light); border-radius: 10px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <thead>
+              <tr style="background: #090b10; color: var(--text-dim); text-align: left;">
+                <th style="padding: 10px 14px;">Tài Khoản</th>
+                <th style="padding: 10px 14px;">Họ và Tên</th>
+                <th style="padding: 10px 14px;">Chức Vụ</th>
+                <th style="padding: 10px 14px;">Trạng Thái</th>
+                <th style="padding: 10px 14px;">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="directorManagersTableBody">
+              <!-- Load dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 3: Đổi mật khẩu Giám Đốc -->
+      <div id="tabSecurity" class="tab-content">
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Mật Khẩu Giám Đốc Hiện Tại (*):</label>
+          <input type="password" id="dirOldPass" class="input-field" placeholder="Nhập mật khẩu cũ...">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Mật Khẩu Giám Đốc Mới (*):</label>
+          <input type="password" id="dirNewPass" class="input-field" placeholder="Nhập mật khẩu mới...">
+        </div>
+        <button id="btnDirectorChangePass" class="plan-btn btn-red" style="width: fit-content; margin-top: 8px;">
+          <i data-lucide="check"></i> Đổi Mật Khẩu Giám Đốc
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Thông báo</div>
+
   <script>
-/**
- * ENTERPRISE TIMECLOCK SAAS PRO - KIOSK CONTROLLER (V3.9)
- * 1. Chống mở mã nguồn F12 / Inspect / Chuột phải
- * 2. Đăng nhập Email + Mật khẩu xác thực Backend
- * 3. Giấu hoàn toàn email, chỉ hiển thị "Xin chào [Tên]" trên thanh tác vụ
- * 4. Đồng hồ nguyên tử đồng bộ Server Time & mở Google Form
- */
-
-// =====================================================================
-// BẢO VỆ CHỐNG MỞ MÃ NGUỒN & THANH CÔNG CỤ DEVTOOLS (ANTI-INSPECT)
-// =====================================================================
-document.addEventListener("contextmenu", (e) => e.preventDefault());
-
-document.addEventListener("keydown", (e) => {
-  // Chặn F12
-  if (e.key === "F12") {
-    e.preventDefault();
-    return false;
-  }
-  // Chặn Ctrl + Shift + I / J / C (Mở DevTools)
-  if (e.ctrlKey && e.shiftKey && ["I", "i", "J", "j", "C", "c"].includes(e.key)) {
-    e.preventDefault();
-    return false;
-  }
-  // Chặn Ctrl + U (Xem mã nguồn View-Source) & Ctrl + S (Lưu trang)
-  if (e.ctrlKey && ["U", "u", "S", "s"].includes(e.key)) {
-    e.preventDefault();
-    return false;
-  }
-});
-
-let currentServerOffsetMs = 0;
-let currentBranch = null;
-let currentActiveFormUrl = "";
-let currentUser = null;
-
-// DOM Elements
-const hoursEl = document.getElementById("hours");
-const minutesEl = document.getElementById("minutes");
-const secondsEl = document.getElementById("seconds");
-const ampmEl = document.getElementById("ampm");
-const dayOfWeekEl = document.getElementById("dayOfWeek");
-const fullDateEl = document.getElementById("fullDate");
-const currentShiftTextEl = document.getElementById("currentShiftText");
-
-const loginAuthOverlay = document.getElementById("loginAuthOverlay");
-const inputLoginEmail = document.getElementById("inputLoginEmail");
-const inputLoginPassword = document.getElementById("inputLoginPassword");
-const btnLoginSubmit = document.getElementById("btnLoginSubmit");
-const btnLogoutUser = document.getElementById("btnLogoutUser");
-
-const headerGreetingText = document.getElementById("headerGreetingText");
-const dispUserName = document.getElementById("dispUserName");
-const dispUserRole = document.getElementById("dispUserRole");
-
-const cardWorkIn = document.getElementById("cardWorkIn");
-const cardWorkOut = document.getElementById("cardWorkOut");
-
-// Google Form Modal
-const formModal = document.getElementById("formModal");
-const modalTag = document.getElementById("modalTag");
-const modalHeading = document.getElementById("modalHeading");
-const googleFormIframe = document.getElementById("googleFormIframe");
-const iframeLoader = document.getElementById("iframeLoader");
-const btnOpenNewTab = document.getElementById("btnOpenNewTab");
-const btnCloseModal = document.getElementById("btnCloseModal");
-
-const btnFullscreen = document.getElementById("btnFullscreen");
-const fullscreenIcon = document.getElementById("fullscreenIcon");
-const toast = document.getElementById("toastNotification");
-
-const DAYS_VI = [
-  "CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"
-];
-
-// =====================================================================
-// 1. ĐỒNG BỘ THỜI GIAN NGUYÊN TỬ SERVER TIME
-// =====================================================================
-async function syncServerStatus() {
-  try {
-    const res = await fetch("/api/system/status");
-    const data = await res.json();
-
-    const localNow = Date.now();
-    currentServerOffsetMs = data.server_epoch_ms - localNow;
-    currentBranch = data.branch;
-
-    if (data.branch && data.branch.name) {
-      document.getElementById("displayStoreName").textContent = data.branch.name;
-    }
-  } catch (err) {
-    console.warn("Lỗi đồng bộ máy chủ:", err);
-  }
-}
-
-function updateAtomicClock() {
-  const now = new Date(Date.now() + currentServerOffsetMs);
-
-  const rawHours = now.getHours();
-  const rawMinutes = now.getMinutes();
-  const rawSeconds = now.getSeconds();
-
-  if (hoursEl) hoursEl.textContent = String(rawHours).padStart(2, "0");
-  if (minutesEl) minutesEl.textContent = String(rawMinutes).padStart(2, "0");
-  if (secondsEl) secondsEl.textContent = String(rawSeconds).padStart(2, "0");
-  if (ampmEl) ampmEl.textContent = rawHours >= 12 ? "PM" : "AM";
-
-  const dayName = DAYS_VI[now.getDay()];
-  const dateNum = String(now.getDate()).padStart(2, "0");
-  const monthNum = String(now.getMonth() + 1).padStart(2, "0");
-  const yearNum = now.getFullYear();
-
-  if (dayOfWeekEl) dayOfWeekEl.textContent = dayName;
-  if (fullDateEl) fullDateEl.textContent = `Ngày ${dateNum} Tháng ${monthNum}, Năm ${yearNum}`;
-
-  if (currentShiftTextEl) {
-    if (rawHours >= 6 && rawHours < 14) {
-      currentShiftTextEl.textContent = "Ca Sáng (06:00 - 14:00)";
-    } else if (rawHours >= 14 && rawHours < 22) {
-      currentShiftTextEl.textContent = "Ca Chiều (14:00 - 22:00)";
-    } else {
-      currentShiftTextEl.textContent = "Ca Đêm (22:00 - 06:00)";
-    }
-  }
-}
-
-// =====================================================================
-// 2. ĐĂNG NHẬP EMAIL & MẬT KHẨU (BẢO VỆ PHÍA MÁY CHỦ)
-// =====================================================================
-function checkUserSession() {
-  const savedUserJson = localStorage.getItem("timeclock_user_session");
-  if (savedUserJson) {
-    try {
-      currentUser = JSON.parse(savedUserJson);
-      applyAuthenticatedUser(currentUser);
-      return;
-    } catch (e) {}
-  }
-
-  // Chưa đăng nhập -> Hiện màn hình đăng nhập
-  loginAuthOverlay.style.display = "flex";
-  headerGreetingText.textContent = "Chưa Đăng Nhập";
-}
-
-function applyAuthenticatedUser(user) {
-  loginAuthOverlay.style.display = "none";
-  // CHỈ HIỂN THỊ "XIN CHÀO + TÊN" (GIẤU HOÀN TOÀN EMAIL)
-  headerGreetingText.textContent = `Xin chào ${user.employee_name}`;
-  dispUserName.textContent = user.employee_name;
-  dispUserRole.textContent = user.role;
-}
-
-btnLoginSubmit.addEventListener("click", async () => {
-  const email = inputLoginEmail.value.trim().toLowerCase();
-  const password = inputLoginPassword.value.trim();
-
-  if (!email || !email.includes("@")) {
-    showToast("Vui lòng nhập Email nhân viên hợp lệ!");
-    return;
-  }
-  if (!password) {
-    showToast("Vui lòng nhập Mật khẩu tài khoản!");
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, password: password })
+    // Anti-inspect
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "F12") { e.preventDefault(); return false; }
+      if (e.ctrlKey && e.shiftKey && ["I","i","J","j","C","c"].includes(e.key)) { e.preventDefault(); return false; }
+      if (e.ctrlKey && ["U","u","S","s"].includes(e.key)) { e.preventDefault(); return false; }
+      if (e.key === "i" || e.key === "I") { openForm("WORK_IN"); }
+      if (e.key === "o" || e.key === "O") { openForm("WORK_OUT"); }
     });
 
-    const data = await res.json();
-    if (res.ok && data.success) {
-      currentUser = {
-        employee_name: data.employee_name,
-        role: data.role,
-        session_token: data.session_token
-      };
-      // Lưu phiên làm việc (Chỉ lưu Tên, không lưu Mật khẩu hay Email)
-      localStorage.setItem("timeclock_user_session", JSON.stringify(currentUser));
-      applyAuthenticatedUser(currentUser);
+    // Lấy tenant từ URL (?tenant=xyz)
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentTenant = urlParams.get("tenant") || "coffee-house";
 
-      inputLoginEmail.value = "";
-      inputLoginPassword.value = "";
-      showToast(`🎉 Xin chào ${data.employee_name}! Đã mở khóa vào ca.`);
-    } else {
-      showToast(`❌ ${data.detail || "Đăng nhập thất bại!"}`);
+    let currentServerOffsetMs = 0;
+    let currentTenantData = null;
+    let currentManager = null;
+    let activeFormUrl = "";
+
+    // 1. Kiểm tra trạng thái Kiosk & Bản Quyền
+    async function checkKioskStatus() {
+      try {
+        const res = await fetch(`/api/kiosk/status?tenant=${encodeURIComponent(currentTenant)}`);
+        const data = await res.json();
+
+        // NẾU BỊ KHÓA BẢN QUYỀN
+        if (data.status === "SUSPENDED") {
+          document.getElementById("licenseLockedOverlay").style.display = "flex";
+          document.getElementById("lockedCompanyName").textContent = data.company_name || "DOANH NGHIỆP";
+          document.getElementById("lockedTenantDisplay").textContent = currentTenant;
+          if (data.detail) document.getElementById("lockedReasonText").textContent = data.detail;
+          return;
+        }
+
+        // BẢN QUYỀN HOẠT ĐỘNG
+        document.getElementById("licenseLockedOverlay").style.display = "none";
+        currentTenantData = data;
+        currentServerOffsetMs = data.server_epoch_ms - Date.now();
+
+        // Cập nhật tên hiển thị
+        if (data.branch && data.branch.name) {
+          document.getElementById("displayStoreName").textContent = data.branch.name;
+          document.getElementById("loginStoreNameTitle").textContent = data.branch.name;
+        }
+        if (data.branch && data.branch.code) {
+          document.getElementById("displayBranchName").textContent = data.branch.code;
+        }
+
+        // Kiểm tra ca làm việc của Quản Lý
+        checkManagerSession();
+      } catch (err) {
+        console.error("Lỗi kết nối máy chủ:", err);
+      }
     }
-  } catch (err) {
-    showToast("Lỗi kết nối máy chủ: " + err.message);
-  }
-});
 
-inputLoginPassword.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") btnLoginSubmit.click();
-});
+    // 2. Kiểm tra phiên Quản Lý mở ca
+    function checkManagerSession() {
+      const sessKey = `kiosk_manager_${currentTenant}`;
+      const saved = localStorage.getItem(sessKey);
+      if (saved) {
+        try {
+          currentManager = JSON.parse(saved);
+          applyManagerLoggedIn(currentManager);
+          return;
+        } catch (e) {}
+      }
 
-btnLogoutUser.addEventListener("click", () => {
-  localStorage.removeItem("timeclock_user_session");
-  currentUser = null;
-  loginAuthOverlay.style.display = "flex";
-  dispUserName.textContent = "Đang tải...";
-  dispUserRole.textContent = "---";
-  headerGreetingText.textContent = "Chưa Đăng Nhập";
-  showToast("Đã đăng xuất đổi ca thành công!");
-});
+      // Chưa mở ca -> hiện hộp thoại Quản lý đăng nhập
+      document.getElementById("managerLoginOverlay").style.display = "flex";
+      document.getElementById("headerGreetingText").textContent = "Chưa Mở Ca";
+      document.getElementById("dispManagerName").textContent = "Chưa có Quản lý trực ca";
+      document.getElementById("dispManagerRole").textContent = "Vui lòng mở ca Kiosk";
+    }
 
-// =====================================================================
-// 3. MỞ GOOGLE FORM ĐIỂM DANH (WORK IN & WORK OUT)
-// =====================================================================
-window.handleOpenGoogleForm = function(type) {
-  if (!currentUser) {
-    showToast("Vui lòng đăng nhập tài khoản trước khi điểm danh!");
-    loginAuthOverlay.style.display = "flex";
-    return;
-  }
+    function applyManagerLoggedIn(mgr) {
+      document.getElementById("managerLoginOverlay").style.display = "none";
+      document.getElementById("headerGreetingText").textContent = `Quản lý: ${mgr.manager_name}`;
+      document.getElementById("dispManagerName").textContent = mgr.manager_name;
+      document.getElementById("dispManagerRole").textContent = mgr.role || "CỬA HÀNG TRƯỞNG";
+    }
 
-  let formUrl = "";
-  if (type === "WORK_IN") {
-    formUrl = currentBranch?.google_form_work_in || "https://docs.google.com/forms/d/e/1FAIpQLScJ_v5aA0mD6q8_demo_work_in/viewform?embedded=true";
-    modalTag.textContent = "WORK IN";
-    modalTag.style.background = "var(--primary-red)";
-    modalHeading.textContent = `[VÀO CA] Điểm Danh - ${currentUser.employee_name}`;
-  } else {
-    formUrl = currentBranch?.google_form_work_out || "https://docs.google.com/forms/d/e/1FAIpQLSdX_w7bB1nE7r9_demo_work_out/viewform?embedded=true";
-    modalTag.textContent = "WORK OUT";
-    modalTag.style.background = "#ff3344";
-    modalHeading.textContent = `[TAN CA] Báo Cáo - ${currentUser.employee_name}`;
-  }
+    // Nút đăng nhập Quản lý mở ca
+    document.getElementById("btnManagerLoginSubmit").addEventListener("click", async () => {
+      const u = document.getElementById("inputManagerUsername").value.trim();
+      const p = document.getElementById("inputManagerPassword").value.trim();
+      if (!u || !p) return showToast("Vui lòng nhập Tên đăng nhập và Mật khẩu Quản Lý!");
 
-  currentActiveFormUrl = formUrl;
+      try {
+        const res = await fetch("/api/manager/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tenant_code: currentTenant, username: u, password: p })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          currentManager = {
+            manager_name: data.manager_name,
+            role: data.role,
+            session_token: data.session_token
+          };
+          localStorage.setItem(`kiosk_manager_${currentTenant}`, JSON.stringify(currentManager));
+          applyManagerLoggedIn(currentManager);
+          document.getElementById("inputManagerUsername").value = "";
+          document.getElementById("inputManagerPassword").value = "";
+          showToast(`🎉 Xin chào ${data.manager_name}! Đã mở ca chấm công thành công.`);
+        } else {
+          showToast(data.detail || "Đăng nhập thất bại!");
+        }
+      } catch (err) {
+        showToast("Lỗi kết nối: " + err.message);
+      }
+    });
 
-  iframeLoader.style.display = "flex";
-  iframeLoader.style.opacity = "1";
-  googleFormIframe.src = formUrl;
+    document.getElementById("inputManagerPassword").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnManagerLoginSubmit").click();
+    });
 
-  googleFormIframe.onload = () => {
-    iframeLoader.style.opacity = "0";
-    setTimeout(() => { iframeLoader.style.display = "none"; }, 300);
-  };
+    // Đổi ca (Đăng xuất Quản lý)
+    document.getElementById("btnChangeShift").addEventListener("click", () => {
+      localStorage.removeItem(`kiosk_manager_${currentTenant}`);
+      currentManager = null;
+      document.getElementById("managerLoginOverlay").style.display = "flex";
+      document.getElementById("headerGreetingText").textContent = "Chưa Mở Ca";
+      document.getElementById("dispManagerName").textContent = "Chưa có Quản lý trực ca";
+      document.getElementById("dispManagerRole").textContent = "Vui lòng mở ca Kiosk";
+      showToast("Đã đóng ca làm việc thành công!");
+    });
 
-  formModal.classList.add("active");
-  document.body.style.overflow = "hidden";
-};
+    // 3. Mở Google Form Điểm Danh (WORK IN & WORK OUT)
+    window.openForm = function(type) {
+      if (!currentManager) {
+        showToast("Vui lòng để Quản Lý đăng nhập mở ca trước khi chấm công!");
+        document.getElementById("managerLoginOverlay").style.display = "flex";
+        return;
+      }
 
-function closeFormModal() {
-  formModal.classList.remove("active");
-  document.body.style.overflow = "";
-  setTimeout(() => { googleFormIframe.src = "about:blank"; }, 200);
-}
+      const branch = currentTenantData?.branch;
+      let formUrl = "";
+      if (type === "WORK_IN") {
+        formUrl = branch?.google_form_work_in || "https://docs.google.com/forms/d/e/1FAIpQLScJ_v5aA0mD6q8_demo_work_in/viewform?embedded=true";
+        document.getElementById("modalTag").textContent = "WORK IN";
+        document.getElementById("modalHeading").textContent = `[VÀO CA] Điểm Danh Nhân Viên - ${branch?.name || ''}`;
+      } else {
+        formUrl = branch?.google_form_work_out || "https://docs.google.com/forms/d/e/1FAIpQLSdX_w7bB1nE7r9_demo_work_out/viewform?embedded=true";
+        document.getElementById("modalTag").textContent = "WORK OUT";
+        document.getElementById("modalHeading").textContent = `[TAN CA] Báo Cáo Tan Ca - ${branch?.name || ''}`;
+      }
 
-btnCloseModal.addEventListener("click", closeFormModal);
-formModal.addEventListener("click", (e) => {
-  if (e.target === formModal) closeFormModal();
-});
+      activeFormUrl = formUrl;
+      document.getElementById("googleFormIframe").src = formUrl;
+      document.getElementById("formModal").style.display = "flex";
+    };
 
-btnOpenNewTab.addEventListener("click", () => {
-  if (currentActiveFormUrl && currentActiveFormUrl !== "about:blank") {
-    window.open(currentActiveFormUrl, "_blank", "noopener,noreferrer");
-  }
-});
+    document.getElementById("btnCloseModal").addEventListener("click", () => {
+      document.getElementById("formModal").style.display = "none";
+      document.getElementById("googleFormIframe").src = "";
+    });
 
-btnFullscreen.addEventListener("click", () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  } else {
-    if (document.exitFullscreen) document.exitFullscreen();
-  }
-});
+    document.getElementById("btnOpenNewTab").addEventListener("click", () => {
+      if (activeFormUrl) window.open(activeFormUrl, "_blank");
+    });
 
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add("show");
-  setTimeout(() => { toast.classList.remove("show"); }, 3500);
-}
+    // 4. CÀI ĐẶT CỦA GIÁM ĐỐC (DIRECTOR CONSOLE)
+    function openDirectorModal() {
+      document.getElementById("directorModal").style.display = "flex";
+      document.getElementById("directorAuthCard").style.display = "flex";
+      document.getElementById("directorDashboardCard").style.display = "none";
+      document.getElementById("inputDirectorPass").value = "";
+      document.getElementById("inputDirectorPass").focus();
+    }
 
-window.addEventListener("DOMContentLoaded", () => {
-  if (window.lucide) lucide.createIcons();
-  updateAtomicClock();
-  setInterval(updateAtomicClock, 1000);
+    document.getElementById("btnOpenDirectorModal").addEventListener("click", openDirectorModal);
+    document.getElementById("btnOpenDirectorFromLogin").addEventListener("click", openDirectorModal);
 
-  syncServerStatus();
-  setInterval(syncServerStatus, 30000);
+    document.getElementById("btnCancelDirectorAuth").addEventListener("click", () => {
+      document.getElementById("directorModal").style.display = "none";
+    });
 
-  checkUserSession();
-});
+    document.getElementById("btnCloseDirectorConsole").addEventListener("click", () => {
+      document.getElementById("directorModal").style.display = "none";
+      checkKioskStatus();
+    });
 
-</script>
+    // Xác thực mật khẩu Giám Đốc
+    document.getElementById("btnDirectorSubmit").addEventListener("click", async () => {
+      const pass = document.getElementById("inputDirectorPass").value.trim();
+      if (!pass) return showToast("Vui lòng nhập mật khẩu Giám Đốc!");
+
+      try {
+        const res = await fetch("/api/director/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tenant_code: currentTenant, password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById("directorAuthCard").style.display = "none";
+          document.getElementById("directorDashboardCard").style.display = "flex";
+          loadDirectorData();
+          showToast("Xác thực Giám Đốc thành công!");
+        } else {
+          showToast(data.detail || "Sai mật khẩu Giám Đốc!");
+        }
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    });
+
+    document.getElementById("inputDirectorPass").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnDirectorSubmit").click();
+    });
+
+    window.switchDirectorTab = function(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+      event.currentTarget.classList.add("active");
+      document.getElementById(tabId).classList.add("active");
+    };
+
+    async function loadDirectorData() {
+      try {
+        const res = await fetch(`/api/director/config?tenant=${encodeURIComponent(currentTenant)}`);
+        const data = await res.json();
+
+        // Nạp Tab 1: Form & Cơ sở
+        document.getElementById("dirInputCompanyName").value = data.company_name || "";
+        document.getElementById("dirInputBranchName").value = data.branch_name || "";
+        document.getElementById("dirInputBranchCode").value = data.branch_code || "";
+        document.getElementById("dirInputWorkIn").value = data.google_form_work_in || "";
+        document.getElementById("dirInputWorkOut").value = data.google_form_work_out || "";
+
+        // Nạp Tab 2: Danh sách Quản lý
+        const tbody = document.getElementById("directorManagersTableBody");
+        tbody.innerHTML = "";
+        (data.managers || []).forEach(mgr => {
+          const isActive = mgr.is_active === 1;
+          const tr = document.createElement("tr");
+          tr.style.borderBottom = "1px solid var(--border-light)";
+          tr.innerHTML = `
+            <td style="padding: 10px 14px; font-family: var(--font-mono); color: #60a5fa; font-weight: 700;">${mgr.username}</td>
+            <td style="padding: 10px 14px; color: #fff; font-weight: 700;">${mgr.full_name}</td>
+            <td style="padding: 10px 14px; color: var(--text-dim);">${mgr.role}</td>
+            <td style="padding: 10px 14px;">
+              <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 800; background: ${isActive ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}; color: ${isActive ? '#34d399' : '#f87171'};">
+                ${isActive ? 'CHO PHÉP' : 'ĐÃ KHÓA'}
+              </span>
+            </td>
+            <td style="padding: 10px 14px;">
+              <div style="display: flex; gap: 6px;">
+                <button class="ctrl-btn" style="padding: 4px 8px; font-size: 0.72rem;" onclick="toggleDirectorManager(${mgr.id})">
+                  ${isActive ? 'Khóa' : 'Mở'}
+                </button>
+                <button class="ctrl-btn" style="padding: 4px 8px; font-size: 0.72rem; color: #ff5252;" onclick="deleteDirectorManager(${mgr.id})">
+                  Xóa
+                </button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        if (window.lucide) lucide.createIcons();
+      } catch (err) {
+        console.error("Lỗi nạp dữ liệu Giám đốc:", err);
+      }
+    }
+
+    // Giám đốc Lưu cấu hình
+    document.getElementById("btnDirectorSaveForms").addEventListener("click", async () => {
+      const cName = document.getElementById("dirInputCompanyName").value.trim();
+      const bName = document.getElementById("dirInputBranchName").value.trim();
+      const bCode = document.getElementById("dirInputBranchCode").value.trim();
+      const inUrl = document.getElementById("dirInputWorkIn").value.trim();
+      const outUrl = document.getElementById("dirInputWorkOut").value.trim();
+
+      if (!cName || !bName) return showToast("Vui lòng nhập Tên Doanh Nghiệp và Tên Chi Nhánh!");
+
+      try {
+        const res = await fetch("/api/director/update-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tenant_code: currentTenant,
+            company_name: cName,
+            branch_name: bName,
+            branch_code: bCode,
+            work_in_url: inUrl,
+            work_out_url: outUrl
+          })
+        });
+        const data = await res.json();
+        showToast(data.message);
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    });
+
+    // Giám đốc thêm Quản lý mới
+    document.getElementById("btnDirectorAddManager").addEventListener("click", async () => {
+      const u = document.getElementById("newMgrUsername").value.trim();
+      const fn = document.getElementById("newMgrFullName").value.trim();
+      const p = document.getElementById("newMgrPassword").value.trim();
+      const r = document.getElementById("newMgrRole").value.trim() || "QUẢN LÝ CA";
+
+      if (!u || !fn || !p) return showToast("Vui lòng điền đủ Tên đăng nhập, Họ tên và Mật khẩu!");
+
+      try {
+        const res = await fetch("/api/director/managers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tenant_code: currentTenant,
+            username: u,
+            full_name: fn,
+            password: p,
+            role: r
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message);
+          document.getElementById("newMgrUsername").value = "";
+          document.getElementById("newMgrFullName").value = "";
+          document.getElementById("newMgrPassword").value = "";
+          document.getElementById("newMgrRole").value = "";
+          loadDirectorData();
+        } else {
+          showToast(data.detail || "Không thể tạo tài khoản Quản lý!");
+        }
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    });
+
+    window.toggleDirectorManager = async function(id) {
+      try {
+        const res = await fetch(`/api/director/managers/${id}/toggle`, { method: "POST" });
+        const data = await res.json();
+        showToast(data.message);
+        loadDirectorData();
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    };
+
+    window.deleteDirectorManager = async function(id) {
+      if (confirm("Bạn có chắc chắn muốn xóa tài khoản Quản lý này?")) {
+        try {
+          const res = await fetch(`/api/director/managers/${id}`, { method: "DELETE" });
+          const data = await res.json();
+          showToast(data.message);
+          loadDirectorData();
+        } catch (err) {
+          showToast("Lỗi: " + err.message);
+        }
+      }
+    };
+
+    // Giám đốc đổi mật khẩu
+    document.getElementById("btnDirectorChangePass").addEventListener("click", async () => {
+      const oldP = document.getElementById("dirOldPass").value.trim();
+      const newP = document.getElementById("dirNewPass").value.trim();
+      if (!oldP || !newP) return showToast("Vui lòng nhập mật khẩu cũ và mới!");
+
+      try {
+        const res = await fetch("/api/director/change-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tenant_code: currentTenant, old_password: oldP, new_password: newP })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message);
+          document.getElementById("dirOldPass").value = "";
+          document.getElementById("dirNewPass").value = "";
+        } else {
+          showToast(data.detail || "Không thể đổi mật khẩu!");
+        }
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    });
+
+    // Đồng hồ nguyên tử
+    const DAYS_VI = ["CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"];
+    function updateClock() {
+      const now = new Date(Date.now() + currentServerOffsetMs);
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+
+      document.getElementById("hours").textContent = h;
+      document.getElementById("minutes").textContent = m;
+      document.getElementById("seconds").textContent = s;
+      document.getElementById("ampm").textContent = now.getHours() >= 12 ? "PM" : "AM";
+
+      document.getElementById("dayOfWeek").textContent = DAYS_VI[now.getDay()];
+      document.getElementById("fullDate").textContent = `Ngày ${String(now.getDate()).padStart(2, "0")} Tháng ${String(now.getMonth() + 1).padStart(2, "0")}, Năm ${now.getFullYear()}`;
+    }
+
+    // Fullscreen F11
+    document.getElementById("btnFullscreen").addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3500);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) lucide.createIcons();
+      checkKioskStatus();
+      setInterval(updateClock, 1000);
+      updateClock();
+    });
+  </script>
 </body>
 </html>

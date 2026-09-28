@@ -523,12 +523,22 @@
           </button>
         </div>
 
-        <!-- Card 2: Cài Đặt Liên Kết Google Form -->
+        <!-- Card 2: Cài Đặt Tên Cơ Sở & Google Form -->
         <div class="admin-card">
-          <h3 class="admin-card-title"><i data-lucide="file-spreadsheet"></i> Cấu Hình Google Form Chấm Công</h3>
+          <h3 class="admin-card-title"><i data-lucide="store"></i> Thông Tin Cơ Sở & Google Form</h3>
           <p class="card-helper-text">
-            Kiosk sẽ tự động nhúng và hiển thị các Google Form này khi nhân viên bấm Check-In / Check-Out:
+            Tên cơ sở và mô tả sẽ hiển thị trực tiếp trên thanh tiêu đề của Kiosk điểm danh:
           </p>
+
+          <div class="input-group">
+            <label>Tên Cơ Sở / Cửa Hàng / Doanh Nghiệp (*):</label>
+            <input type="text" id="inputBranchName" placeholder="Ví dụ: THE COFFEE HOUSE - CHI NHÁNH 01" autocomplete="off">
+          </div>
+
+          <div class="input-group">
+            <label>Mô Tả / Phụ Đề Cơ Sở:</label>
+            <input type="text" id="inputBranchCode" placeholder="Ví dụ: Cổng Điểm Danh Chi Nhánh 1" autocomplete="off">
+          </div>
 
           <div class="input-group">
             <label>URL Google Form "WORK IN" (Vào Ca):</label>
@@ -541,7 +551,7 @@
           </div>
 
           <button id="btnSaveGoogleForms" class="plan-btn btn-red" style="margin-top: 8px;">
-            <i data-lucide="save"></i> Lưu Liên Kết Google Form
+            <i data-lucide="save"></i> Lưu Thông Tin Cơ Sở & Biểu Mẫu
           </button>
         </div>
       </div>
@@ -667,9 +677,12 @@
         });
 
         // Nạp thông tin Google Form
+        // Nạp thông tin Cơ Sở & Google Form
         const sysRes = await fetch("/api/system/status");
         const sysData = await sysRes.json();
         if (sysData.branch) {
+          document.getElementById("inputBranchName").value = sysData.branch.name || "";
+          document.getElementById("inputBranchCode").value = sysData.branch.code || "";
           document.getElementById("inputFormWorkIn").value = sysData.branch.google_form_work_in || "";
           document.getElementById("inputFormWorkOut").value = sysData.branch.google_form_work_out || "";
         }
@@ -746,17 +759,26 @@
       }
     };
 
-    // Lưu liên kết Google Form
+    // Lưu thông tin Cơ Sở & Google Form
     document.getElementById("btnSaveGoogleForms").addEventListener("click", async () => {
+      const bName = document.getElementById("inputBranchName").value.trim();
+      const bCode = document.getElementById("inputBranchCode").value.trim();
       const inUrl = document.getElementById("inputFormWorkIn").value.trim();
       const outUrl = document.getElementById("inputFormWorkOut").value.trim();
 
+      if (!bName) {
+        showToast("Vui lòng nhập tên Cơ Sở / Cửa Hàng!");
+        return;
+      }
+
       try {
-        const res = await fetch("/api/admin/update-forms", {
+        const res = await fetch("/api/admin/update-branch", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             branch_id: 1,
+            branch_name: bName,
+            branch_code: bCode,
             work_in_url: inUrl,
             work_out_url: outUrl
           })
@@ -764,7 +786,7 @@
         const result = await res.json();
         showToast(result.message);
       } catch (err) {
-        showToast("Lỗi lưu Google Form: " + err.message);
+        showToast("Lỗi lưu thông tin cơ sở: " + err.message);
       }
     });
 

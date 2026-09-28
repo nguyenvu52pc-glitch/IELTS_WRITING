@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tâm Quản Trị Bản Quyền SaaS (Super Admin) - Master Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-dark: #07080b;
+      --bg-surface: #0e1118;
+      --bg-card: #131622;
+      --bg-input: #090b10;
+      --primary-red: #e50914;
+      --primary-red-hover: #ff1e2b;
+      --accent-green: #10b981;
+      --accent-gold: #f59e0b;
+      --text-white: #ffffff;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --font-main: 'Montserrat', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .bg-grid {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* AUTH OVERLAY */
+    .admin-auth-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(7, 8, 11, 0.96);
+      backdrop-filter: blur(14px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-box {
+      background: var(--bg-card);
+      border: 1.5px solid rgba(229, 9, 20, 0.5);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(229, 9, 20, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .auth-icon-circle {
+      width: 68px; height: 68px;
+      background: rgba(229, 9, 20, 0.15);
+      border: 2px solid var(--primary-red);
+      border-radius: 50%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff5252;
+    }
+
+    .auth-box h2 {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .auth-box input {
+      background: var(--bg-input);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+      font-family: var(--font-mono);
+      transition: all 0.2s;
+    }
+
+    .auth-box input:focus {
+      border-color: var(--primary-red);
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+      background: #0f121a;
+    }
+
+    /* MAIN WRAPPER */
+    .master-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 30px 24px 60px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .master-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-surface);
+      padding: 22px 30px;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      border-left: 6px solid var(--primary-red);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .master-title-box h1 {
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .master-title-box p {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* STATS CARDS */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 800px) {
+      .stats-row { grid-template-columns: 1fr; }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-meta h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .stat-meta .stat-val {
+      font-size: 2rem;
+      font-weight: 900;
+      font-family: var(--font-mono);
+    }
+
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* GRID */
+    .master-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 1080px) {
+      .master-grid { grid-template-columns: 1fr; }
+    }
+
+    .master-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+    }
+
+    .card-title svg {
+      width: 22px; height: 22px;
+      color: var(--primary-red);
+    }
+
+    /* FORM CONTROLS */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-group input, .input-group select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary-red);
+      background: #0f121a;
+      box-shadow: 0 0 16px rgba(229, 9, 20, 0.4);
+    }
+
+    .plan-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s ease;
+      color: #fff;
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg, var(--primary-red) 0%, #b8050e 100%);
+      color: #fff !important;
+      box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4);
+    }
+
+    .btn-red:hover {
+      background: var(--primary-red-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(229, 9, 20, 0.65);
+    }
+
+    /* DATA TABLE */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.88rem;
+    }
+
+    .data-table th {
+      background: #090b10;
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-dim);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .badge-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .badge-suspended {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #f87171;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .btn-toggle-suspend {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 800;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle-suspend:hover {
+      background: var(--primary-red);
+      color: #fff;
+    }
+
+    .btn-toggle-activate {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 800;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle-activate:hover {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .btn-del {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: #94a3b8;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .btn-del:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .link-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .link-chip:hover {
+      border-color: #60a5fa;
+      background: rgba(96, 165, 250, 0.1);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: #181b26;
+      border-left: 4px solid var(--primary-red);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <!-- CỔNG XÁC THỰC MẬT KHẨU SUPER ADMIN -->
+  <div id="superAuthOverlay" class="admin-auth-overlay">
+    <div class="auth-box">
+      <div class="auth-icon-circle"><i data-lucide="shield-check" style="width: 34px; height: 34px;"></i></div>
+      <h2>SUPER ADMIN BẢN QUYỀN</h2>
+      <p style="font-size: 0.86rem; color: var(--text-dim);">
+        Cổng kiểm soát trung tâm SaaS dành riêng cho Nhà cung cấp phần mềm. Vui lòng nhập mật khẩu chủ:
+      </p>
+      <input type="password" id="masterPassInput" placeholder="Nhập mật khẩu Super Admin..." autofocus autocomplete="off">
+      <button id="btnMasterLogin" class="plan-btn btn-red" style="padding: 14px;">
+        <i data-lucide="unlock"></i> ĐĂNG NHẬP TRUNG TÂM KIỂM SOÁT
+      </button>
+    </div>
+  </div>
+
+  <!-- GIAO DIỆN CHÍNH SUPER ADMIN -->
+  <div class="master-wrapper" id="masterContentWrapper" style="display: none;">
+    <!-- Header -->
+    <header class="master-header">
+      <div class="master-title-box">
+        <h1><i data-lucide="crown" style="color: var(--accent-gold);"></i> TRUNG TÂM KIỂM SOÁT BẢN QUYỀN SAAS (SUPER ADMIN)</h1>
+        <p>Quản lý toàn bộ danh sách Công Ty Khách Hàng • Bật / Khóa quyền hoạt động chỉ với 1 cú click</p>
+      </div>
+      <div>
+        <button id="btnMasterLogout" class="plan-btn" style="background: rgba(255,255,255,0.08);">
+          <i data-lucide="log-out"></i> Đăng Xuất
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-meta">
+          <h4>Tổng Số Khách Hàng</h4>
+          <div class="stat-val" id="totalEnterprises">0</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(96, 165, 250, 0.15); color: #60a5fa;">
+          <i data-lucide="building-2"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-meta">
+          <h4>Đang Hoạt Động (Active)</h4>
+          <div class="stat-val" id="activeEnterprises" style="color: #34d399;">0</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+          <i data-lucide="check-circle-2"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-meta">
+          <h4>Đang Bị Khóa (Suspended)</h4>
+          <div class="stat-val" id="suspendedEnterprises" style="color: #f87171;">0</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+          <i data-lucide="ban"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="master-grid">
+      <!-- Cột Trái: Cấp Bản Quyền Cho Công Ty Mới -->
+      <div class="master-card">
+        <h3 class="card-title"><i data-lucide="plus-circle"></i> Cấp Phép Doanh Nghiệp Mới</h3>
+        <p style="font-size: 0.84rem; color: var(--text-dim); margin-top: -6px; line-height: 1.5;">
+          Tạo tài khoản cho một công ty/khách hàng mới mua phần mềm của bạn:
+        </p>
+
+        <div class="input-group">
+          <label>Tên Doanh Nghiệp / Công Ty (*):</label>
+          <input type="text" id="newCompanyName" placeholder="Ví dụ: NHÀ HÀNG HẢI SẢN BIỂN ĐÔNG" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label>Mã Định Danh Tenant (*):</label>
+          <input type="text" id="newTenantCode" placeholder="Ví dụ: bien-dong" autocomplete="off" style="font-family: var(--font-mono);">
+          <small style="font-size: 0.74rem; color: var(--text-dim);">Dùng để tạo đường link Kiosk riêng: <code>/?tenant=bien-dong</code></small>
+        </div>
+
+        <div class="input-group">
+          <label>Mật Khẩu Giám Đốc Ban Đầu (*):</label>
+          <input type="password" id="newDirectorPass" placeholder="Đặt mật khẩu Giám Đốc..." autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label>Gói Cước & Thời Hạn:</label>
+          <select id="newPlanDays">
+            <option value="365">Gói 1 Năm (365 Ngày) - Doanh Nghiệp</option>
+            <option value="180">Gói 6 Tháng (180 Ngày)</option>
+            <option value="30">Dùng Thử (30 Ngày)</option>
+            <option value="1095">Gói 3 Năm (1095 Ngày)</option>
+          </select>
+        </div>
+
+        <button id="btnCreateEnterprise" class="plan-btn btn-red" style="margin-top: 8px;">
+          <i data-lucide="shield-check"></i> CẤP BẢN QUYỀN DOANH NGHIỆP
+        </button>
+      </div>
+
+      <!-- Cột Phải: Bảng Danh Sách Công Ty Đang Kiểm Soát -->
+      <div class="master-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px;">
+          <h3 class="card-title" style="border: none; padding: 0;">
+            <i data-lucide="layers"></i> Danh Sách Công Ty Khách Hàng Được Kiểm Soát
+          </h3>
+          <button onclick="loadEnterprises()" class="btn-del" title="Làm mới"><i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i></button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tên Công Ty / Tenant</th>
+                <th>Link Kiosk Điểm Danh</th>
+                <th>Quản Lý Ca</th>
+                <th>Hạn Bản Quyền</th>
+                <th>Trạng Thái</th>
+                <th>Thao Tác Bản Quyền</th>
+              </tr>
+            </thead>
+            <tbody id="enterprisesTableBody">
+              <!-- Load dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Thông báo</div>
+
+  <script>
+    function checkSuperAuth() {
+      const token = sessionStorage.getItem("super_admin_token");
+      if (token) {
+        document.getElementById("superAuthOverlay").style.display = "none";
+        document.getElementById("masterContentWrapper").style.display = "flex";
+        loadEnterprises();
+      } else {
+        document.getElementById("superAuthOverlay").style.display = "flex";
+        document.getElementById("masterContentWrapper").style.display = "none";
+      }
+    }
+
+    document.getElementById("btnMasterLogin").addEventListener("click", async () => {
+      const pass = document.getElementById("masterPassInput").value.trim();
+      if (!pass) return showToast("Vui lòng nhập mật khẩu Super Admin!");
+
+      try {
+        const res = await fetch("/api/super-admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          sessionStorage.setItem("super_admin_token", data.token);
+          checkSuperAuth();
+          showToast("Đăng nhập Super Admin thành công!");
+        } else {
+          showToast(data.detail || "Sai mật khẩu Super Admin!");
+        }
+      } catch (err) {
+        showToast("Lỗi kết nối: " + err.message);
+      }
+    });
+
+    document.getElementById("masterPassInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnMasterLogin").click();
+    });
+
+    document.getElementById("btnMasterLogout").addEventListener("click", () => {
+      sessionStorage.removeItem("super_admin_token");
+      checkSuperAuth();
+    });
+
+    async function loadEnterprises() {
+      try {
+        const res = await fetch("/api/super-admin/enterprises");
+        const data = await res.json();
+        const tbody = document.getElementById("enterprisesTableBody");
+        tbody.innerHTML = "";
+
+        const list = data.enterprises || [];
+        document.getElementById("totalEnterprises").textContent = list.length;
+        const activeCount = list.filter(x => x.status === "ACTIVE").length;
+        document.getElementById("activeEnterprises").textContent = activeCount;
+        document.getElementById("suspendedEnterprises").textContent = list.length - activeCount;
+
+        const currentOrigin = window.location.origin;
+
+        list.forEach(ent => {
+          const isActive = ent.status === "ACTIVE";
+          const tr = document.createElement("tr");
+          const kioskUrl = `${currentOrigin}/?tenant=${ent.tenant_code}`;
+
+          tr.innerHTML = `
+            <td>
+              <div style="font-weight: 800; color: #fff;">${ent.company_name}</div>
+              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: #8ab4f8;">Mã: ${ent.tenant_code}</div>
+            </td>
+            <td>
+              <a href="${kioskUrl}" target="_blank" class="link-chip" title="Mở Kiosk khách hàng">
+                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> /?tenant=${ent.tenant_code}
+              </a>
+            </td>
+            <td style="font-family: var(--font-mono); font-weight: 700; color: #fff;">
+              ${ent.manager_count} Quản lý
+            </td>
+            <td style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-dim);">
+              ${ent.expires_at || 'Vĩnh viễn'}
+            </td>
+            <td>
+              <span class="${isActive ? 'badge-active' : 'badge-suspended'}">
+                <i data-lucide="${isActive ? 'shield-check' : 'shield-alert'}" style="width: 13px; height: 13px;"></i>
+                ${isActive ? 'HOẠT ĐỘNG' : 'ĐÃ KHÓA'}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 8px;">
+                <button class="${isActive ? 'btn-toggle-suspend' : 'btn-toggle-activate'}" onclick="toggleStatus(${ent.id})">
+                  ${isActive ? 'Khóa Bản Quyền' : 'Kích Hoạt Lại'}
+                </button>
+                <button class="btn-del" onclick="deleteEnterprise(${ent.id}, '${ent.company_name}')" title="Xóa vĩnh viễn">
+                  <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                </button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        if (window.lucide) lucide.createIcons();
+      } catch (err) {
+        console.error("Lỗi tải danh sách công ty:", err);
+      }
+    }
+
+    // Cấp bản quyền công ty mới
+    document.getElementById("btnCreateEnterprise").addEventListener("click", async () => {
+      const cName = document.getElementById("newCompanyName").value.trim();
+      const tCode = document.getElementById("newTenantCode").value.trim().toLowerCase();
+      const dPass = document.getElementById("newDirectorPass").value.trim();
+      const days = parseInt(document.getElementById("newPlanDays").value);
+
+      if (!cName || !tCode || !dPass) {
+        return showToast("Vui lòng điền đủ Tên công ty, Mã tenant và Mật khẩu Giám Đốc!");
+      }
+
+      try {
+        const res = await fetch("/api/super-admin/enterprises", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            company_name: cName,
+            tenant_code: tCode,
+            director_password: dPass,
+            days_valid: days
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message);
+          document.getElementById("newCompanyName").value = "";
+          document.getElementById("newTenantCode").value = "";
+          document.getElementById("newDirectorPass").value = "";
+          loadEnterprises();
+        } else {
+          showToast(data.detail || "Không thể cấp bản quyền!");
+        }
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    });
+
+    window.toggleStatus = async function(id) {
+      try {
+        const res = await fetch(`/api/super-admin/enterprises/${id}/toggle`, { method: "POST" });
+        const data = await res.json();
+        showToast(data.message);
+        loadEnterprises();
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    };
+
+    window.deleteEnterprise = async function(id, name) {
+      if (confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn công ty "${name}" khỏi hệ thống?`)) {
+        try {
+          const res = await fetch(`/api/super-admin/enterprises/${id}`, { method: "DELETE" });
+          const data = await res.json();
+          showToast(data.message);
+          loadEnterprises();
+        } catch (err) {
+          showToast("Lỗi: " + err.message);
+        }
+      }
+    };
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3500);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) lucide.createIcons();
+      checkSuperAuth();
+    });
+  </script>
+</body>
+</html>
