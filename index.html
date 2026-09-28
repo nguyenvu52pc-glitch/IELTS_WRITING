@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Chấm Công Doanh Nghiệp SaaS Pro</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    /* Màn hình khóa đăng nhập Email + Mật khẩu */
+    .login-auth-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(8, 9, 12, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 5000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      max-width: 480px;
+      width: 100%;
+      background: #12151e;
+      border: 2px solid var(--primary-red);
+      border-radius: 20px;
+      padding: 38px;
+      box-shadow: 0 0 50px rgba(229, 9, 20, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      text-align: center;
+    }
+    .brand-circle-icon {
+      width: 58px; height: 58px;
+      background: linear-gradient(135deg, var(--primary-red), #800);
+      border-radius: 50%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+    }
+    .input-field {
+      background: #090a0e;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 13px 16px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      border-color: var(--primary-red);
+    }
+    /* Thanh hiển thị Xin chào + Tên trên thanh tác vụ */
+    .welcome-user-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(229, 9, 20, 0.2), rgba(0, 0, 0, 0.6));
+      border: 1px solid var(--primary-red);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .welcome-user-tag svg {
+      width: 16px; height: 16px;
+      color: var(--accent-green);
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+  <div class="bg-grid"></div>
+  <div class="glow-sphere glow-left"></div>
+  <div class="glow-sphere glow-right"></div>
+
+  <!-- ===================================================================
+       1. CỔNG ĐĂNG NHẬP EMAIL & MẬT KHẨU BẢO MẬT (SERVER AUTH)
+       =================================================================== -->
+  <div id="loginAuthOverlay" class="login-auth-overlay" style="display: flex;">
+    <div class="login-card">
+      <div class="brand-circle-icon">
+        <i data-lucide="shield-check" style="width: 30px; height: 30px;"></i>
+      </div>
+
+      <div>
+        <h2 style="font-size: 1.45rem; font-weight: 900; margin-bottom: 6px;">ĐĂNG NHẬP ĐIỂM DANH</h2>
+        <p style="font-size: 0.88rem; color: var(--text-dim); line-height: 1.4;">
+          Vui lòng nhập Email và Mật khẩu được cấp để truy cập hệ thống Kiosk:
+        </p>
+      </div>
+
+      <!-- Ô nhập Email & Mật khẩu -->
+      <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+        <div>
+          <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 6px;">Email nhân viên (*):</label>
+          <input type="email" id="inputLoginEmail" class="input-field" placeholder="tennhanvien@gmail.com" autocomplete="off">
+        </div>
+        <div>
+          <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 6px;">Mật khẩu (*):</label>
+          <input type="password" id="inputLoginPassword" class="input-field" placeholder="Nhập mật khẩu..." autocomplete="off">
+        </div>
+      </div>
+
+      <button id="btnLoginSubmit" class="plan-btn btn-red" style="padding: 13px; font-size: 0.95rem; font-weight: 800;">
+        <i data-lucide="log-in"></i> ĐĂNG NHẬP VÀO CA
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       2. GIAO DIỆN CHÍNH KIOSK CHẤM CÔNG
+       =================================================================== -->
+  <div class="app-wrapper">
+    <!-- Top System Bar -->
+    <header class="system-header">
+      <div class="brand-section">
+        <div class="brand-logo-box">
+          <i data-lucide="layers" class="brand-icon"></i>
+        </div>
+        <div class="brand-meta">
+          <h1 class="brand-name" id="displayStoreName">HỆ THỐNG ĐIỀU HÀNH CHUỖI</h1>
+          <span class="system-subtitle" id="displayBranchName">Cổng Điểm Danh & Chấm Công Chuỗi</span>
+        </div>
+      </div>
+
+      <div class="system-status-group">
+        <!-- CHỈ HIỂN THỊ "XIN CHÀO + TÊN" TRÊN THANH TÁC VỤ (GIẤU HOÀN TOÀN EMAIL) -->
+        <div class="welcome-user-tag" id="welcomeUserTag">
+          <i data-lucide="user-check"></i>
+          <span id="headerGreetingText">Xin chào Nhân Viên</span>
+        </div>
+
+        <button id="btnLogoutUser" class="ctrl-btn" title="Đăng xuất đổi ca" style="width: auto; padding: 0 14px; gap: 6px; font-size: 0.8rem; font-weight: 700;">
+          <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> Đổi Ca
+        </button>
+
+        <button id="btnFullscreen" class="ctrl-btn" title="Toàn màn hình (F11)">
+          <i data-lucide="maximize" id="fullscreenIcon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-container">
+      <!-- CỘT TRÁI: ĐỒNG HỒ NGUYÊN TỬ SERVER TIME -->
+      <section class="left-panel">
+        <div class="clock-card">
+          <div class="card-badge">
+            <i data-lucide="server" class="badge-icon"></i>
+            <span>ĐỒNG BỘ THỜI GIAN NGUYÊN TỬ (SERVER TIME)</span>
+          </div>
+
+          <div class="digital-clock-container">
+            <div class="time-main">
+              <span id="hours" class="time-digit">00</span>
+              <span class="time-colon">:</span>
+              <span id="minutes" class="time-digit">00</span>
+              <span class="time-colon">:</span>
+              <span id="seconds" class="time-digit highlight-red">00</span>
+            </div>
+            <div class="period-badge" id="ampm">AM</div>
+          </div>
+
+          <div class="date-container">
+            <div class="day-of-week" id="dayOfWeek">ĐANG CẬP NHẬT...</div>
+            <div class="full-date" id="fullDate">Đang kết nối thời gian thực...</div>
+          </div>
+
+          <div class="clock-divider"></div>
+
+          <!-- Thông tin nhân sự trực ca (GIẤU KÍN EMAIL) -->
+          <div class="security-sensor-box">
+            <div class="sensor-title" style="color: #ff6b6b;">
+              <i data-lucide="badge-check"></i> NHÂN SỰ ĐANG TRỰC CA
+            </div>
+            <div class="sensor-row">
+              <span class="sensor-label">Họ và Tên:</span>
+              <span class="sensor-val" id="dispUserName" style="color: #fff; font-size: 1rem;">Đang tải...</span>
+              <span class="sensor-badge badge-green"><i data-lucide="check"></i> HỢP LỆ</span>
+            </div>
+            <div class="sensor-row">
+              <span class="sensor-label">Vị trí chức vụ:</span>
+              <span class="sensor-val" id="dispUserRole" style="color: #8ab4f8;">---</span>
+            </div>
+          </div>
+
+          <div class="shift-info-box">
+            <div class="info-row">
+              <span class="info-label"><i data-lucide="clock-4"></i> Ca làm việc:</span>
+              <span class="info-value red-tag" id="currentShiftText">Ca Sáng (06:00 - 14:00)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CỘT PHẢI: WORK IN & WORK OUT MỞ GOOGLE FORM -->
+      <section class="right-panel">
+        <!-- NÚT 1: WORK IN -->
+        <div class="action-card card-work-in" id="cardWorkIn" onclick="handleOpenGoogleForm('WORK_IN')">
+          <div class="card-border-glow"></div>
+          <div class="card-content">
+            <div class="card-top-meta">
+              <span class="action-badge in-badge"><i data-lucide="arrow-down-left"></i> CHECK-IN</span>
+              <span class="shortcut-hint">Phím [ I ]</span>
+            </div>
+            <div class="card-hero">
+              <div class="action-icon-circle in-circle"><i data-lucide="log-in"></i></div>
+              <div class="action-title-group">
+                <h2 class="action-title">WORK IN</h2>
+                <h3 class="action-sub-vi">VÀO CA LÀM VIỆC</h3>
+              </div>
+            </div>
+            <p class="action-desc">
+              Mở Biểu mẫu Google Form ghi nhận giờ đến, chấm công vào ca và đồng bộ trực tiếp về Google Sheets của quản lý.
+            </p>
+            <div class="action-footer">
+              <span class="btn-cta"><span>Mở Google Form Vào Ca</span> <i data-lucide="arrow-right"></i></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- NÚT 2: WORK OUT -->
+        <div class="action-card card-work-out" id="cardWorkOut" onclick="handleOpenGoogleForm('WORK_OUT')">
+          <div class="card-border-glow"></div>
+          <div class="card-content">
+            <div class="card-top-meta">
+              <span class="action-badge out-badge"><i data-lucide="arrow-up-right"></i> CHECK-OUT</span>
+              <span class="shortcut-hint">Phím [ O ]</span>
+            </div>
+            <div class="card-hero">
+              <div class="action-icon-circle out-circle"><i data-lucide="log-out"></i></div>
+              <div class="action-title-group">
+                <h2 class="action-title">WORK OUT</h2>
+                <h3 class="action-sub-vi">KẾT THÚC CA (TAN CA)</h3>
+              </div>
+            </div>
+            <p class="action-desc">
+              Mở Biểu mẫu Google Form báo cáo doanh số, bàn giao hàng tồn và xác nhận kết thúc ca làm việc.
+            </p>
+            <div class="action-footer">
+              <span class="btn-cta"><span>Mở Google Form Tan Ca</span> <i data-lucide="arrow-right"></i></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="system-footer">
+      <div class="footer-left">
+        <i data-lucide="cpu" class="footer-icon"></i>
+        <span>TIMECLOCK SAAS PRO • HỆ THỐNG ĐIỂM DANH BẢO MẬT DOANH NGHIỆP</span>
+      </div>
+      <div class="footer-right">
+        <span>Bảo mật hạ tầng đám mây</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ===================================================================
+       3. CỬA SỔ POPUP NHÚNG GOOGLE FORM (FULL 100%)
+       =================================================================== -->
+  <div class="modal-overlay" id="formModal">
+    <div class="modal-wrapper">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-indicator" id="modalTag">WORK IN</span>
+          <h3 id="modalHeading" class="modal-heading">Biểu Mẫu Google Form Điểm Danh</h3>
+        </div>
+        <div class="modal-controls">
+          <button id="btnOpenNewTab" class="modal-btn-sub" title="Mở biểu mẫu trong tab mới">
+            <i data-lucide="external-link"></i> Mở tab mới
+          </button>
+          <button id="btnCloseModal" class="modal-btn-close" title="Đóng cửa sổ">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="iframe-loader" id="iframeLoader">
+          <div class="spinner"></div>
+          <p>Đang tải Google Form của doanh nghiệp...</p>
+        </div>
+        <iframe id="googleFormIframe" src="" frameborder="0" marginheight="0" marginwidth="0">Đang tải biểu mẫu...</iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toastNotification" class="toast">Thông báo hệ thống</div>
+
+  <!-- Kiosk Logic -->
+  <script src="/static/js/kiosk.js"></script>
+</body>
+</html>
