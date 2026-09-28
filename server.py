@@ -147,20 +147,26 @@ def create_enterprise(req: CreateEnterpriseRequest):
 
     expires = (datetime.now() + timedelta(days=req.days_valid or 365)).strftime("%Y-%m-%d")
     d_hash = database.hash_password(d_pass)
+    lic_key = f"SAAS-{t_code.upper()}-{uuid.uuid4().hex[:6].upper()}"
 
-    cursor.execute("""
-        INSERT INTO enterprises (company_name, tenant_code, director_password_hash, status, plan_tier, expires_at)
-        VALUES (?, ?, ?, 'ACTIVE', ?, ?)
-    """, (c_name, t_code, d_hash, req.plan_tier or "ENTERPRISE", expires))
-    ent_id = cursor.lastrowid
+    try:
+        cursor.execute("""
+            INSERT INTO enterprises (company_name, tenant_code, license_key, director_password_hash, status, plan_tier, expires_at)
+            VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)
+        """, (c_name, t_code, lic_key, d_hash, req.plan_tier or "ENTERPRISE", expires))
+        ent_id = cursor.lastrowid
 
-    # Tạo branch mặc định cho công ty
-    cursor.execute("""
-        INSERT INTO branches (enterprise_id, branch_name, branch_code, google_form_work_in, google_form_work_out)
-        VALUES (?, ?, ?, '', '')
-    """, (ent_id, f"{c_name} - Cơ Sở 01", "Cổng Điểm Danh Chi Nhánh 1"))
+        # Tạo branch mặc định cho công ty
+        cursor.execute("""
+            INSERT INTO branches (enterprise_id, branch_name, branch_code, google_form_work_in, google_form_work_out)
+            VALUES (?, ?, ?, '', '')
+        """, (ent_id, f"{c_name} - Cơ Sở 01", "Cổng Điểm Danh Chi Nhánh 1"))
 
-    conn.commit()
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Lỗi tạo doanh nghiệp: {str(e)}")
+
     conn.close()
     return {"success": True, "message": f"Đã cấp bản quyền thành công cho công ty: {c_name} (Mã: {t_code})"}
 

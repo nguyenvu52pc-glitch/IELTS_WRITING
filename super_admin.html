@@ -725,9 +725,16 @@
             days_valid: days
           })
         });
-        const data = await res.json();
+        let data;
+        const text = await res.text();
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          data = { detail: text };
+        }
+
         if (res.ok) {
-          showToast(data.message);
+          showToast(data.message || "Cấp bản quyền thành công!");
           document.getElementById("newCompanyName").value = "";
           document.getElementById("newTenantCode").value = "";
           document.getElementById("newDirectorPass").value = "";
