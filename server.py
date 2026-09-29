@@ -18,7 +18,7 @@ from typing import Optional, List
 from fastapi import FastAPI, Request, HTTPException, Depends, Header, Query
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
@@ -26,16 +26,11 @@ import database
 
 # Khởi tạo DB & Migration
 database.init_db()
+database.cleanup_expired_sessions()
 
 app = FastAPI(title="Enterprise TimeClock Multi-Tenant SaaS", version="5.0.0")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -93,7 +88,7 @@ def get_client_ip(request: Request) -> str:
     """Lấy IP thực tế của client (hỗ trợ reverse proxy như Render / Cloudflare)"""
     x_forwarded = request.headers.get("x-forwarded-for")
     if x_forwarded:
-        return x_forwarded.split(",")[0].strip()
+        return x_forwarded.split(",")[-1].strip()
     if request.client:
         return request.client.host
     return "127.0.0.1"
@@ -137,6 +132,11 @@ def normalize_google_form_url(url: str) -> str:
 
     # Dạng forms.gle ngắn
     return u
+
+def require_same_tenant(session: dict, t_code: str):
+    """Token Giám Đốc chỉ được thao tác trên đúng cơ sở của mình (kể cả khi tenant nằm trong body)"""
+    if (session.get("tenant_code") or "") != t_code:
+        raise HTTPException(status_code=403, detail="Bạn không có quyền thao tác trên cơ sở này!")
 
 # =====================================================================
 # DEPENDENCIES: BEARER TOKEN AUTHENTICATION
@@ -223,7 +223,7 @@ def super_admin_login(req: SuperAdminLoginRequest, request: Request):
 
     if not is_valid:
         database.record_failed_login(ip_key, max_attempts=5, lock_minutes=15)
-        database.record_failed_login(acc_key, max_attempts=5, lock_minutes=15)
+        database.record_failed_login(acc_key, max_attempts=30, lock_minutes=15)
         raise HTTPException(status_code=401, detail="Mật khẩu Super Admin không chính xác!")
 
     # 3. Tự động nâng cấp hash lên bcrypt nếu cần
@@ -308,21 +308,17 @@ def create_enterprise(
     lic_key = f"SAAS-{t_code.upper()}-{uuid.uuid4().hex[:6].upper()}"
 
     try:
-        database.execute("""
-            INSERT INTO enterprises (company_name, tenant_code, license_key, director_password_hash, status, plan_tier, expires_at)
-            VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)
-        """, (c_name, t_code, lic_key, d_hash, req.plan_tier or "ENTERPRISE", expires))
-
-        ent = database.query_one("SELECT id FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
-        ent_id = ent["id"]
-
-        database.execute("""
-            INSERT INTO branches (enterprise_id, branch_name, branch_code, google_form_work_in, google_form_work_out)
-            VALUES (?, ?, ?, '', '')
-        """, (ent_id, f"{c_name} - Cơ Sở 01", "Cổng Điểm Danh Chi Nhánh 1"))
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Lỗi tạo doanh nghiệp: {str(e)}")
+        database.transaction([
+            ("""INSERT INTO enterprises (company_name, tenant_code, license_key, director_password_hash, status, plan_tier, expires_at)
+                VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)""",
+             (c_name, t_code, lic_key, d_hash, req.plan_tier or "ENTERPRISE", expires)),
+            ("""INSERT INTO branches (enterprise_id, branch_name, branch_code, google_form_work_in, google_form_work_out)
+                SELECT id, ?, ?, '', '' FROM enterprises WHERE tenant_code = ?""",
+             (f"{c_name} - Cơ Sở 01", "Cổng Điểm Danh Chi Nhánh 1", t_code)),
+        ])
+    except Exception:
+        raise HTTPException(status_code=400, detail="Không thể tạo doanh nghiệp (mã công ty có thể đã tồn tại). Vui lòng thử mã khác!")
+    database.cache_clear()
 
     return {"success": True, "message": f"Đã cấp bản quyền thành công cho công ty: {c_name} (Mã: {t_code})"}
 
@@ -332,12 +328,15 @@ def toggle_enterprise_status(
     current_admin=Depends(get_current_super_admin)
 ):
     """Khóa hoặc Mở bản quyền doanh nghiệp (yêu cầu Bearer token)"""
-    ent = database.query_one("SELECT status, company_name FROM enterprises WHERE id = ?", (ent_id,))
+    ent = database.query_one("SELECT status, company_name, tenant_code FROM enterprises WHERE id = ?", (ent_id,))
     if not ent:
         raise HTTPException(status_code=404, detail="Không tìm thấy công ty!")
 
     new_status = "SUSPENDED" if ent["status"] == "ACTIVE" else "ACTIVE"
     database.execute("UPDATE enterprises SET status = ? WHERE id = ?", (new_status, ent_id))
+    if new_status == "SUSPENDED":
+        database.execute("DELETE FROM sessions WHERE tenant_code = ?", (ent["tenant_code"],))
+    database.cache_clear()
     action_text = "ĐÃ KÍCH HOẠT" if new_status == "ACTIVE" else "ĐÃ KHÓA BẢN QUYỀN"
     return {"success": True, "status": new_status, "message": f"{action_text} công ty: {ent['company_name']}"}
 
@@ -355,6 +354,7 @@ def update_enterprise_subscription(
     plan = req.plan_tier or "ENTERPRISE"
     exp = req.expires_at or "2099-12-31"
     database.execute("UPDATE enterprises SET plan_tier = ?, expires_at = ? WHERE id = ?", (plan, exp, ent_id))
+    database.cache_clear()
     return {"success": True, "message": f"Đã cập nhật gói {plan} và hạn sử dụng ({exp}) cho công ty: {ent['company_name']}"}
 
 @app.delete("/api/super-admin/enterprises/{ent_id}")
@@ -363,13 +363,38 @@ def delete_enterprise(
     current_admin=Depends(get_current_super_admin)
 ):
     """Xóa doanh nghiệp khỏi hệ thống (yêu cầu Bearer token)"""
-    database.execute("DELETE FROM branches WHERE enterprise_id = ?", (ent_id,))
-    database.execute("DELETE FROM enterprises WHERE id = ?", (ent_id,))
+    ent = database.query_one("SELECT tenant_code FROM enterprises WHERE id = ?", (ent_id,))
+    if not ent:
+        raise HTTPException(status_code=404, detail="Không tìm thấy công ty!")
+    t = ent["tenant_code"]
+    database.transaction([
+        ("DELETE FROM kiosk_devices WHERE tenant_code = ?", (t,)),
+        ("DELETE FROM sessions WHERE tenant_code = ?", (t,)),
+        ("DELETE FROM branches WHERE enterprise_id = ?", (ent_id,)),
+        ("DELETE FROM enterprises WHERE id = ?", (ent_id,)),
+    ])
+    database.cache_clear()
     return {"success": True, "message": "Đã xóa công ty khỏi hệ thống!"}
 
 # =====================================================================
 # 2. API KIOSK STATUS & KÍCH HOẠT THIẾT BỊ BẰNG MẬT KHẨU GIÁM ĐỐC
 # =====================================================================
+def _load_kiosk_row(t_code: str):
+    """Doanh nghiệp + chi nhánh trong 1 truy vấn, nhớ 15 giây (mọi thay đổi từ Super Admin / Giám Đốc sẽ xóa cache ngay)"""
+    key = f"kiosk:{t_code}"
+    row = database.cache_get(key)
+    if row is None:
+        where, params = ("WHERE LOWER(e.tenant_code) = ?", (t_code,)) if t_code else ("", ())
+        row = database.query_one(f"""
+            SELECT e.id, e.company_name, e.tenant_code, e.status, e.expires_at,
+                   b.branch_name, b.branch_code, b.google_form_work_in, b.google_form_work_out
+            FROM enterprises e LEFT JOIN branches b ON b.enterprise_id = e.id
+            {where} ORDER BY e.id ASC, b.id ASC LIMIT 1
+        """, params)
+        if row:
+            database.cache_set(key, row, 15)
+    return row
+
 @app.get("/api/kiosk/status")
 def get_kiosk_status(
     tenant: Optional[str] = None,
@@ -377,16 +402,9 @@ def get_kiosk_status(
     device_token: Optional[str] = Query(None)
 ):
     """
-    Kiểm tra trạng thái Kiosk:
-    - Kiểm tra khóa bản quyền (SUSPENDED)
-    - Kiểm tra hạn dùng (expires_at) - hết hạn coi như bị khóa
-    - CHỈ trả link Google Form khi thiết bị có Device Token hợp lệ đã đăng ký trong DB!
+    Trạng thái Kiosk: khóa bản quyền, hết hạn, và chỉ trả link Google Form khi thiết bị đã kích hoạt.
     """
-    t_code = (tenant or "").strip().lower()
-    if t_code:
-        ent = database.query_one("SELECT * FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
-    else:
-        ent = database.query_one("SELECT * FROM enterprises ORDER BY id ASC")
+    ent = _load_kiosk_row((tenant or "").strip().lower())
 
     if not ent:
         return {
@@ -395,7 +413,6 @@ def get_kiosk_status(
             "detail": "Hệ thống chưa tìm thấy dữ liệu doanh nghiệp này. Vui lòng liên hệ nhà cung cấp phần mềm."
         }
 
-    # 1. Kiểm tra trạng thái bản quyền
     if ent["status"] != "ACTIVE":
         return {
             "status": "SUSPENDED",
@@ -404,12 +421,10 @@ def get_kiosk_status(
             "detail": "BẢN QUYỀN HỆ THỐNG ĐÃ TẠM KHÓA. Vui lòng liên hệ nhà cung cấp phần mềm để gia hạn / kích hoạt."
         }
 
-    # 2. Kiểm tra ngày hết hạn (expires_at)
     expires_at = ent.get("expires_at")
     if expires_at and expires_at != "Vĩnh viễn":
-        today_str = datetime.now().strftime("%Y-%m-%d")
         exp_clean = str(expires_at).split(" ")[0]
-        if exp_clean < today_str:
+        if exp_clean < datetime.now().strftime("%Y-%m-%d"):
             return {
                 "status": "SUSPENDED",
                 "tenant_code": ent["tenant_code"],
@@ -417,28 +432,19 @@ def get_kiosk_status(
                 "detail": f"Bản quyền phần mềm đã hết hạn vào ngày {exp_clean}. Vui lòng liên hệ nhà cung cấp để gia hạn."
             }
 
-    # 3. Xác thực Device Token của Kiosk
-    raw_dev_token = x_device_token or device_token or ""
-    is_device_activated = database.verify_kiosk_device(ent["tenant_code"], raw_dev_token)
-
-    branch = database.query_one("SELECT * FROM branches WHERE enterprise_id = ? ORDER BY id ASC", (ent["id"],))
-    branch_dict = branch or {}
+    activated = database.verify_kiosk_device(ent["tenant_code"], x_device_token or device_token or "")
     now = datetime.now()
-
-    # CHỈ TRẢ LINK FORM KHI ĐÃ KÍCH HOẠT THIẾT BỊ HỢP LỆ TRONG DB!
-    form_work_in = branch_dict.get("google_form_work_in", "") if is_device_activated else ""
-    form_work_out = branch_dict.get("google_form_work_out", "") if is_device_activated else ""
 
     return {
         "status": "ACTIVE",
         "tenant_code": ent["tenant_code"],
         "company_name": ent["company_name"],
-        "is_device_activated": is_device_activated,
+        "is_device_activated": activated,
         "branch": {
-            "name": branch_dict.get("branch_name", ent["company_name"]),
-            "code": branch_dict.get("branch_code", "Cổng Điểm Danh Tự Động"),
-            "google_form_work_in": form_work_in,
-            "google_form_work_out": form_work_out
+            "name": ent.get("branch_name") or ent["company_name"],
+            "code": ent.get("branch_code") or "Cổng Điểm Danh Tự Động",
+            "google_form_work_in": (ent.get("google_form_work_in") or "") if activated else "",
+            "google_form_work_out": (ent.get("google_form_work_out") or "") if activated else ""
         },
         "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
         "server_epoch_ms": int(now.timestamp() * 1000)
@@ -453,7 +459,7 @@ def kiosk_activate(req: KioskActivateRequest, request: Request):
     client_ip = get_client_ip(request)
     t_code = req.tenant_code.strip().lower()
     raw_pass = req.password.strip()
-    rate_key = f"acc:kiosk_act:{t_code}"
+    rate_key = f"kiosk:{t_code}:{client_ip}"
 
     # Rate Limiting
     blocked, rem = database.check_rate_limit(rate_key, max_attempts=5, lock_minutes=15)
@@ -499,7 +505,7 @@ def director_login(req: DirectorLoginRequest, request: Request):
     client_ip = get_client_ip(request)
     t_code = req.tenant_code.strip().lower()
     raw_pass = req.password.strip()
-    rate_key = f"acc:director:{t_code}"
+    rate_key = f"dir:{t_code}:{client_ip}"
 
     # Rate Limiting
     blocked, rem = database.check_rate_limit(rate_key, max_attempts=5, lock_minutes=15)
@@ -562,6 +568,7 @@ def update_director_config(
     Tự động chuẩn hóa link Google Form sang /viewform?embedded=true
     """
     t_code = req.tenant_code.strip().lower()
+    require_same_tenant(current_director, t_code)
     ent = database.query_one("SELECT id FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
     if not ent:
         raise HTTPException(status_code=404, detail="Không tìm thấy doanh nghiệp!")
@@ -588,6 +595,7 @@ def update_director_config(
             WHERE enterprise_id = ?
         """, (req.branch_name.strip(), norm_in, norm_out, ent["id"]))
 
+    database.cache_clear()
     return {
         "success": True,
         "message": "Đã lưu thành công thông tin cơ sở & biểu mẫu Google Form!",
@@ -602,6 +610,7 @@ def change_director_password(
 ):
     """Giám Đốc đổi mật khẩu quản trị (yêu cầu Bearer token)"""
     t_code = req.tenant_code.strip().lower()
+    require_same_tenant(current_director, t_code)
     ent = database.query_one("SELECT id, director_password_hash FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
 
     if not ent:
@@ -621,6 +630,10 @@ def change_director_password(
 # =====================================================================
 # 4. GIAO DIỆN WEB (STATIC SERVE)
 # =====================================================================
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
+
 @app.get("/", response_class=HTMLResponse)
 def serve_kiosk():
     p = find_static_file("index.html")

@@ -12,13 +12,15 @@ import os
 import sqlite3
 import hashlib
 import secrets
+import time
+import threading
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any, Tuple
 from contextlib import contextmanager
 import bcrypt
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "timeclock_saas.db")
+DB_PATH = os.environ.get("TIMECLOCK_DB") or os.path.join(BASE_DIR, "timeclock_saas.db")
 DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
 
 # Chuẩn hóa tiền tố postgres:// sang postgresql:// cho psycopg2
@@ -29,34 +31,44 @@ IS_POSTGRES = bool(DATABASE_URL)
 
 # Connection pool cho PostgreSQL
 PG_POOL = None
+_PG_LOCK = threading.Lock()
 
 def get_pg_pool():
     global PG_POOL
     if PG_POOL is None and IS_POSTGRES:
-        import psycopg2.pool
-        # Loại bỏ các tham số không tương thích nếu có (như &channel_binding=require)
-        clean_url = DATABASE_URL.split("&channel_binding=")[0]
-        PG_POOL = psycopg2.pool.ThreadedConnectionPool(
-            minconn=1,
-            maxconn=10,
-            dsn=clean_url
-        )
+        with _PG_LOCK:
+            if PG_POOL is None:
+                import psycopg2.pool
+                # Loại bỏ các tham số không tương thích nếu có (như &channel_binding=require)
+                clean_url = DATABASE_URL.split("&channel_binding=")[0]
+                PG_POOL = psycopg2.pool.ThreadedConnectionPool(
+                    1, 5, dsn=clean_url,
+                    connect_timeout=10,
+                    keepalives=1, keepalives_idle=30, keepalives_interval=10, keepalives_count=3,
+                )
     return PG_POOL
+
+def _is_conn_error(e: Exception) -> bool:
+    import psycopg2
+    return isinstance(e, (psycopg2.OperationalError, psycopg2.InterfaceError))
 
 @contextmanager
 def get_db_connection():
     """
-    Context manager cung cấp kết nối DB an toàn:
-    - Postgres: mượn kết nối từ ThreadedConnectionPool và hoàn trả lại pool khi xong
+    - Postgres: mượn kết nối từ pool; nếu kết nối bị đứt thì đóng hẳn thay vì trả lại pool
     - SQLite: mở kết nối cục bộ và đóng khi xong
     """
     if IS_POSTGRES:
         pool = get_pg_pool()
         conn = pool.getconn()
+        bad = False
         try:
             yield conn
+        except Exception as e:
+            bad = _is_conn_error(e)
+            raise
         finally:
-            pool.putconn(conn)
+            pool.putconn(conn, close=bad)
     else:
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
@@ -65,43 +77,97 @@ def get_db_connection():
         finally:
             conn.close()
 
+def _pg_run(work):
+    """
+    Chạy work(conn) trên Postgres. Nếu kết nối trong pool đã chết (ví dụ Neon tự ngủ đông)
+    thì lấy kết nối mới và thử lại đúng 1 lần, người dùng không thấy lỗi.
+    """
+    for attempt in (0, 1):
+        try:
+            with get_db_connection() as conn:
+                return work(conn)
+        except Exception as e:
+            if attempt == 0 and _is_conn_error(e):
+                continue
+            raise
+
 def query(sql: str, params: tuple = ()) -> List[Dict[str, Any]]:
-    """Thực thi truy vấn SELECT và trả về danh sách dict"""
+    """SELECT -> danh sách dict. Postgres dùng autocommit nên tiết kiệm 2 vòng mạng BEGIN/ROLLBACK."""
+    if IS_POSTGRES:
+        import psycopg2.extras
+        def work(conn):
+            conn.autocommit = True
+            try:
+                with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                    cur.execute(sql.replace("?", "%s"), params)
+                    return [dict(r) for r in cur.fetchall()]
+            finally:
+                conn.autocommit = False
+        return _pg_run(work)
     with get_db_connection() as conn:
-        if IS_POSTGRES:
-            import psycopg2.extras
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute(sql.replace("?", "%s"), params)
-                rows = cur.fetchall()
-                return [dict(r) for r in rows]
-        else:
-            cur = conn.cursor()
-            cur.execute(sql, params)
-            rows = cur.fetchall()
-            return [dict(r) for r in rows]
+        cur = conn.cursor()
+        cur.execute(sql, params)
+        return [dict(r) for r in cur.fetchall()]
 
 def query_one(sql: str, params: tuple = ()) -> Optional[Dict[str, Any]]:
-    """Thực thi truy vấn SELECT và trả về 1 dòng dict đầu tiên hoặc None"""
     rows = query(sql, params)
     return rows[0] if rows else None
 
 def execute(sql: str, params: tuple = ()) -> int:
-    """Thực thi INSERT / UPDATE / DELETE và commit"""
-    with get_db_connection() as conn:
-        if IS_POSTGRES:
-            with conn.cursor() as cur:
-                pg_sql = sql.replace("?", "%s")
-                cur.execute(pg_sql, params)
-                conn.commit()
-                try:
-                    return cur.lastrowid or cur.rowcount
-                except Exception:
+    """INSERT / UPDATE / DELETE 1 lệnh. Postgres dùng autocommit (không cần BEGIN/COMMIT riêng)."""
+    if IS_POSTGRES:
+        def work(conn):
+            conn.autocommit = True
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(sql.replace("?", "%s"), params)
                     return cur.rowcount
-        else:
-            cur = conn.cursor()
-            cur.execute(sql, params)
+            finally:
+                conn.autocommit = False
+        return _pg_run(work)
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(sql, params)
+        conn.commit()
+        return cur.lastrowid or cur.rowcount
+
+def transaction(statements: List[Tuple[str, tuple]]):
+    """Chạy nhiều lệnh trong 1 giao dịch: hoặc tất cả được lưu, hoặc không lệnh nào."""
+    if IS_POSTGRES:
+        def work(conn):
+            with conn.cursor() as cur:
+                for sql, params in statements:
+                    cur.execute(sql.replace("?", "%s"), params)
             conn.commit()
-            return cur.lastrowid or cur.rowcount
+        _pg_run(work)
+    else:
+        with get_db_connection() as conn:
+            try:
+                cur = conn.cursor()
+                for sql, params in statements:
+                    cur.execute(sql, params)
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+
+# Bộ nhớ đệm ngắn hạn trong RAM (server chạy 1 tiến trình nên đủ dùng)
+_CACHE: Dict[str, Any] = {}
+
+def cache_get(key: str):
+    item = _CACHE.get(key)
+    if item and item[0] > time.monotonic():
+        return item[1]
+    _CACHE.pop(key, None)
+    return None
+
+def cache_set(key: str, value: Any, ttl: float):
+    if len(_CACHE) > 2000:
+        _CACHE.clear()
+    _CACHE[key] = (time.monotonic() + ttl, value)
+
+def cache_clear():
+    _CACHE.clear()
 
 def set_setting(key: str, value: str):
     """Lưu giá trị cấu hình hệ thống (Idempotent upsert)"""
@@ -122,9 +188,11 @@ def get_setting(key: str, default: Optional[str] = None) -> Optional[str]:
 # =====================================================================
 # 1. BĂM MẬT KHẨU (BCRYPT + TỰ ĐỘNG NÂNG CẤP HASH CŨ)
 # =====================================================================
+BCRYPT_ROUNDS = 10  # ~75ms/lần. 12 vòng ~300ms (chậm gấp 4, nhất là trên Render Free)
+
 def hash_password(password: str) -> str:
-    """Băm mật khẩu bằng thuật toán an toàn bcrypt (salt rounds 12)"""
-    salt = bcrypt.gensalt(rounds=12)
+    """Băm mật khẩu bằng bcrypt"""
+    salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
     return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
 def verify_password(raw_password: str, stored_hash: str) -> Tuple[bool, bool]:
@@ -142,14 +210,17 @@ def verify_password(raw_password: str, stored_hash: str) -> Tuple[bool, bool]:
     if stored_hash.startswith("$2b$") or stored_hash.startswith("$2a$") or stored_hash.startswith("$2y$"):
         try:
             valid = bcrypt.checkpw(raw_password.encode("utf-8"), stored_hash.encode("utf-8"))
-            return valid, False
+            # Hash cũ cost cao (12) -> băm lại 1 lần với cost hiện tại để các lần đăng nhập sau nhanh hơn
+            return valid, valid and int(stored_hash.split("$")[2]) > BCRYPT_ROUNDS
         except Exception:
             return False, False
 
     # 2. Kiểm tra SHA-256 legacy (các phiên bản cũ)
     legacy_hash_salt = hashlib.sha256(f"TIMECLOCK_SAAS_{raw_password}".encode("utf-8")).hexdigest()
     legacy_hash_plain = hashlib.sha256(raw_password.encode("utf-8")).hexdigest()
-    if stored_hash in (legacy_hash_salt, legacy_hash_plain):
+    # Bản V4 cũ băm bằng salt cố định này (đang nằm trong DB Postgres của các bản đã triển khai)
+    legacy_hash_v4 = hashlib.sha256(("saas_salt_novalux_2026_xyz" + raw_password).encode("utf-8")).hexdigest()
+    if stored_hash in (legacy_hash_salt, legacy_hash_plain, legacy_hash_v4):
         return True, True  # Mật khẩu đúng nhưng cần nâng cấp lên bcrypt!
 
     return False, False
@@ -233,86 +304,58 @@ def register_kiosk_device(tenant_code: str, device_name: str = "Kiosk Terminal")
     return raw_token
 
 def verify_kiosk_device(tenant_code: str, raw_device_token: str) -> bool:
-    """
-    Kiểm tra xem thiết bị Kiosk có token hợp lệ đã kích hoạt trong DB không
-    """
+    """Kiểm tra token thiết bị Kiosk. Kết quả đúng được nhớ 60 giây để không phải hỏi DB mỗi lần."""
     if not raw_device_token or not tenant_code:
         return False
 
     t_code = tenant_code.strip().lower()
     token_hash = hashlib.sha256(raw_device_token.strip().encode("utf-8")).hexdigest()
-
-    row = query_one("""
-        SELECT id FROM kiosk_devices
-        WHERE tenant_code = ? AND device_token_hash = ?
-    """, (t_code, token_hash))
-
-    if row:
-        # Cập nhật thời điểm sử dụng gần nhất
-        execute("UPDATE kiosk_devices SET last_used_at = CURRENT_TIMESTAMP WHERE id = ?", (row["id"],))
+    ck = f"dev:{t_code}:{token_hash}"
+    if cache_get(ck):
         return True
 
+    row = query_one("SELECT id FROM kiosk_devices WHERE tenant_code = ? AND device_token_hash = ?", (t_code, token_hash))
+    if row:
+        cache_set(ck, True, 60)
+        return True
     return False
 
 # =====================================================================
 # 4. GIỚI HẠN SỐ LẦN ĐĂNG NHẬP SAI (RATE LIMITING THEO IP & TÀI KHOẢN)
 # =====================================================================
+_FAILS: Dict[str, list] = {}  # key -> [số lần sai, khóa đến (epoch), lần sai gần nhất]
+_FAILS_LOCK = threading.Lock()
+
 def check_rate_limit(key: str, max_attempts: int = 5, lock_minutes: int = 15) -> Tuple[bool, int]:
-    """
-    Kiểm tra xem IP hoặc tài khoản có đang bị khóa do nhập sai mật khẩu nhiều lần không.
-    Trả về: (is_blocked, remaining_seconds)
-    """
-    now = datetime.now()
-    now_str = now.strftime("%Y-%m-%d %H:%M:%S")
-
-    row = query_one("SELECT * FROM login_attempts WHERE rate_key = ?", (key,))
-    if not row:
-        return False, 0
-
-    blocked_until_str = row.get("blocked_until")
-    if blocked_until_str:
-        try:
-            blocked_until = datetime.strptime(str(blocked_until_str).split(".")[0], "%Y-%m-%d %H:%M:%S")
-            if blocked_until > now:
-                remaining_secs = int((blocked_until - now).total_seconds())
-                return True, remaining_secs
-        except Exception:
-            pass
-
+    """Trả về (đang bị khóa?, số giây còn lại). Lưu trong RAM nên không tốn truy vấn DB."""
+    rec = _FAILS.get(key)
+    now = time.time()
+    if rec and rec[1] > now:
+        return True, int(rec[1] - now)
     return False, 0
 
 def record_failed_login(key: str, max_attempts: int = 5, lock_minutes: int = 15) -> int:
-    """
-    Ghi nhận một lần nhập sai mật khẩu.
-    Nếu vượt quá max_attempts, khóa tài khoản/IP trong lock_minutes phút.
-    Trả về số lần sai hiện tại.
-    """
-    now = datetime.now()
-    now_str = now.strftime("%Y-%m-%d %H:%M:%S")
-
-    row = query_one("SELECT * FROM login_attempts WHERE rate_key = ?", (key,))
-    if not row:
-        execute("""
-            INSERT INTO login_attempts (rate_key, attempt_count, first_attempt_at, last_attempt_at, blocked_until)
-            VALUES (?, 1, ?, ?, NULL)
-        """, (key, now_str, now_str))
-        return 1
-    else:
-        new_count = row["attempt_count"] + 1
-        blocked_until = None
-        if new_count >= max_attempts:
-            blocked_until = (now + timedelta(minutes=lock_minutes)).strftime("%Y-%m-%d %H:%M:%S")
-
-        execute("""
-            UPDATE login_attempts
-            SET attempt_count = ?, last_attempt_at = ?, blocked_until = ?
-            WHERE rate_key = ?
-        """, (new_count, now_str, blocked_until, key))
-        return new_count
+    """Ghi 1 lần sai; đủ max_attempts thì khóa lock_minutes phút. Lần sai cũ quá hạn khóa sẽ được đếm lại từ đầu."""
+    now = time.time()
+    with _FAILS_LOCK:
+        if len(_FAILS) > 5000:
+            _FAILS.clear()
+        rec = _FAILS.get(key)
+        if not rec or now - rec[2] > lock_minutes * 60:
+            rec = [0, 0, now]
+        rec[0] += 1
+        rec[2] = now
+        if rec[0] >= max_attempts:
+            rec[1] = now + lock_minutes * 60
+        _FAILS[key] = rec
+        return rec[0]
 
 def clear_failed_logins(key: str):
-    """Xóa bỏ lịch sử sai khi đăng nhập thành công"""
-    execute("DELETE FROM login_attempts WHERE rate_key = ?", (key,))
+    """Xóa lịch sử sai khi đăng nhập thành công"""
+    _FAILS.pop(key, None)
+
+def cleanup_expired_sessions():
+    execute("DELETE FROM sessions WHERE expires_at < ?", (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),))
 
 # =====================================================================
 # 5. MIGRATIONS IDEMPOTENT (DỌN DẸP CỘT & BẢNG CŨ AN TOÀN)
@@ -337,6 +380,10 @@ def run_migrations():
         "terminals", "attendance_logs", "payment_orders",
         "email_configs", "allowed_emails", "managers"
     ]
+
+    # Đã migrate rồi thì bỏ qua: tránh ~17 lệnh ALTER/DROP lên Postgres ở MỖI lần khởi động server
+    if get_setting("migrations_v5_done") == "1":
+        return
 
     with get_db_connection() as conn:
         if IS_POSTGRES:
@@ -395,6 +442,47 @@ def run_migrations():
                     conn.commit()
                 except Exception:
                     pass
+
+    _fix_legacy_branches()
+    set_setting("migrations_v5_done", "1")
+
+def _fix_legacy_branches():
+    """
+    DB SQLite cũ có branch_code UNIQUE -> tạo công ty thứ 2 trở đi bị lỗi.
+    Dựng lại bảng branches không có ràng buộc đó, và xóa chi nhánh mồ côi (công ty đã bị xóa).
+    """
+    if IS_POSTGRES:
+        return
+    with get_db_connection() as conn:
+        cur = conn.cursor()
+        has_unique = False
+        for idx in cur.execute("PRAGMA index_list(branches)").fetchall():
+            if idx[2]:
+                cols = [r[2] for r in conn.execute(f"PRAGMA index_info('{idx[1]}')").fetchall()]
+                if cols == ["branch_code"]:
+                    has_unique = True
+        cur.execute("DELETE FROM branches WHERE enterprise_id NOT IN (SELECT id FROM enterprises)")
+        if has_unique:
+            existing = [r[1] for r in cur.execute("PRAGMA table_info(branches)").fetchall()]
+            keep = [c for c in ("id", "enterprise_id", "branch_name", "branch_code",
+                                "google_form_work_in", "google_form_work_out", "created_at") if c in existing]
+            cols = ", ".join(keep)
+            cur.execute("ALTER TABLE branches RENAME TO branches_old")
+            cur.execute("""
+                CREATE TABLE branches (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    enterprise_id INTEGER NOT NULL,
+                    branch_name TEXT NOT NULL,
+                    branch_code TEXT,
+                    google_form_work_in TEXT DEFAULT '',
+                    google_form_work_out TEXT DEFAULT '',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (enterprise_id) REFERENCES enterprises (id) ON DELETE CASCADE
+                )
+            """)
+            cur.execute(f"INSERT INTO branches ({cols}) SELECT {cols} FROM branches_old")
+            cur.execute("DROP TABLE branches_old")
+        conn.commit()
 
 # =====================================================================
 # 6. KHỞI TẠO CƠ SỞ DỮ LIỆU ĐỒNG BỘ
