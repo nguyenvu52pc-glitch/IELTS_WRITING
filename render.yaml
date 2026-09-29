@@ -7,5 +7,7 @@ services:
     envVars:
       - key: PORT
         value: 10000
-      - key: ADMIN_SECRET_PASSWORD
-        value: admin@saas2026
+      - key: SUPER_ADMIN_PASSWORD
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false

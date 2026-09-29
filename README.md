@@ -1,71 +1,108 @@
-# ENTERPRISE TIMECLOCK SAAS PRO (V4.2 CLOUD EDITION)
+# ENTERPRISE TIMECLOCK SAAS PRO (V5.0 SECURE CLOUD EDITION)
 
-> **Hệ Thống Phần Mềm Chấm Công & Điểm Danh Đa Doanh Nghiệp (Multi-Tenant SaaS)**  
-> - **Super Admin (Bạn)**: Cấp quyền, khóa bản quyền tức thì, đổi mật khẩu Super Admin, giám sát toàn bộ khách hàng.  
-> - **Giám Đốc Cửa Hàng (Khách Mua)**: Kích hoạt Kiosk 1 lần duy nhất, tự quản lý link Google Form Vào Ca / Tan Ca và đổi mật khẩu Giám Đốc.  
-> - **Nhân Viên**: Bấm chấm công 24/7 trực tiếp trên màn hình Kiosk (không cần đăng nhập, không cần tài khoản Quản Lý).  
-> - **Lưu Trữ Vĩnh Viễn (Cloud Persistence)**: Tích hợp PostgreSQL (Neon.tech / Supabase / Render Postgres) không bao giờ bị mất dữ liệu khi server Render ngủ đông hoặc khởi động lại.
+Hệ thống phần mềm Kiosk Chấm Công & Điểm Danh Đa Doanh Nghiệp (Multi-Tenant SaaS) xây dựng trên nền tảng **FastAPI**, **PostgreSQL / SQLite**, và giao diện **HTML5 / CSS3 / Vanilla JS** tối ưu tốc độ.
 
 ---
 
-## 🌟 1. GIẢI QUYẾT TRIỆT ĐỂ VẤN ĐỀ DỮ LIỆU BỊ RESET TRÊN RENDER
+## 🏗️ 1. KIẾN TRÚC HỆ THỐNG 3 TẦNG
 
-### Tại sao dữ liệu cục bộ (SQLite) bị mất sau một thời gian không dùng?
-Render (gói Free) sử dụng cơ chế **Ephemeral Filesystem (ổ đĩa tạm)**:
-- Sau 15 phút không có người truy cập, Render sẽ tự động đưa server vào chế độ ngủ (Spin down).
-- Khi có lượt truy cập mới, Render khởi động một container mới tinh dựa trên mã nguồn commit trên GitHub.
-- Mọi dữ liệu ghi vào file SQLite `timeclock_saas.db` trong phiên chạy trước sẽ bị thay thế bằng file gốc trên GitHub!
-
-### Giải pháp tối ưu: Kết nối Cloud Database PostgreSQL miễn phí (100% vĩnh viễn)
-Phần mềm đã được nâng cấp engine `database.py` tự động chuyển sang PostgreSQL khi có biến môi trường `DATABASE_URL`:
-1. Đăng ký tài khoản miễn phí tại **[Neon.tech](https://neon.tech)** hoặc **[Supabase.com](https://supabase.com)**.
-2. Tạo 1 database mới (chọn PostgreSQL miễn phí).
-3. Copy chuỗi kết nối (Connection String), ví dụ:  
-   `postgresql://neondb_owner:xyz...@ep-cool-rain-123456.us-east-2.aws.neon.tech/neondb?sslmode=require`
-4. Vào Render -> Chọn Web Service của bạn -> Tab **Environment** -> Bấm **Add Environment Variable**:
-   - **Key**: `DATABASE_URL`
-   - **Value**: Dán chuỗi kết nối vừa copy ở trên.
-5. Render sẽ tự redeploy. Toàn bộ tài khoản, mật khẩu, bản quyền, link Google Form sẽ được lưu vĩnh viễn trên Cloud, không bao giờ bị mất dữ liệu nữa!
-
----
-
-## 🔑 2. CƠ CHẾ VẬN HÀNH 3 CẤP
-
-### 👑 Cấp 1: Super Admin (Dành cho Bạn - Nhà Cung Cấp SaaS)
-- **Đường dẫn**: `https://<ten-mien-render>.onrender.com/super-admin`
-- **Mật khẩu mặc định**: `owner@saas2026`
-- **Chức năng**:
-  - **Đổi Mật Khẩu Super Admin**: Nút 🔑 trực tiếp trên giao diện, mật khẩu mới được lưu bền vững.
-  - **Tạo Doanh Nghiệp Mới**: Nhập Tên Công Ty, Mã Tenant (ví dụ `the-coffee-house`), và cấp Mật Khẩu Giám Đốc ban đầu.
-  - **Khóa / Mở Bản Quyền (Kill-Switch)**: Nút bật/tắt bản quyền tức thì. Nếu bị khóa, Kiosk của khách hàng lập tức chuyển sang màn hình đỏ cảnh báo và chặn toàn bộ thao tác chấm công.
-  - **Chỉ Báo Cơ Sở Dữ Liệu**: Hiển thị trạng thái đang chạy trên Đám Mây (PostgreSQL) hay Cục Bộ (SQLite).
-
-### 🏢 Cấp 2: Giám Đốc Cơ Sở (Khách Hàng Mua Web)
-- **Đường dẫn Kiosk**: `https://<ten-mien-render>.onrender.com/?tenant=ma-tenant`
-- **Kích Hoạt Thiết Bị (1 Lần Duy Nhất)**:
-  - Khi mở web lần đầu trên thiết bị/máy tính bàn/tablet của quán, Kiosk yêu cầu nhập Mật Khẩu Giám Đốc.
-  - Nhập thành công 1 lần -> Kiosk được mở khóa vĩnh viễn trên trình duyệt đó.
-- **Nút "⚙️ Cài Đặt (Giám Đốc)" ở góc trên bên phải**:
-  - Yêu cầu nhập mật khẩu Giám Đốc để mở cấu hình.
-  - Tự đổi Tên Doanh Nghiệp, Tên Cơ Sở.
-  - Tự dán link Google Form `WORK IN` (Vào Ca) & `WORK OUT` (Tan Ca).
-  - Tự đổi Mật Khẩu Giám Đốc bất cứ lúc nào.
-  - Tùy chọn khóa lại thiết bị Kiosk nếu cần.
-
-### 👥 Cấp 3: Nhân Viên Chấm Công
-- Không cần tài khoản Quản Lý mở ca.
-- Kiosk luôn sẵn sàng 24/7.
-- Chỉ cần chạm vào thẻ to **WORK IN** hoặc **WORK OUT** (hoặc ấn phím tắt `I` / `O`).
-- Google Form hiển thị full màn hình để nhân viên điểm danh và chụp ảnh gửi trực tiếp về Google Sheets của Giám Đốc.
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│                   SUPER ADMIN (Chủ phần mềm)                     │
+│        /super-admin • Xác thực Bearer Token (băm SHA-256)        │
+│  - Cấp quyền / Khóa bản quyền tức thì (Kill-Switch)              │
+│  - Điều chỉnh gói cước (Enterprise/Pro/Basic) & Gia hạn ngày     │
+│  - Đổi mật khẩu Super Admin (băm bcrypt)                         │
+└────────────────────────────────┬─────────────────────────────────┘
+                                 │
+                                 ▼
+┌──────────────────────────────────────────────────────────────────┐
+│             GIÁM ĐỐC CƠ SỞ / CHỦ QUÁN (Khách hàng)               │
+│               /?tenant=<mã-quán> • Nút [⚙️ Cài Đặt]               │
+│  - Kích hoạt Kiosk 1 lần duy nhất bằng mật khẩu Giám Đốc         │
+│  - Tự quản lý và dán link Google Form Vào Ca / Tan Ca            │
+│  - Hệ thống tự chuẩn hóa link sang /viewform?embedded=true       │
+│  - Tự đổi mật khẩu Giám Đốc                                      │
+└────────────────────────────────┬─────────────────────────────────┘
+                                 │
+                                 ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                     NHÂN VIÊN CHẤM CÔNG                          │
+│               /?tenant=<mã-quán> • Màn hình Kiosk                │
+│  - Hoạt động tự động 24/7 (Không cần quản lý mở ca)              │
+│  - Chạm thẻ WORK IN / WORK OUT (Phím tắt: [ I ] / [ O ])         │
+│  - Nhúng Google Form full-screen ghi nhận giờ & ảnh điểm danh    │
+│  - Cơ chế Device Token: Chỉ hiển thị form khi máy đã kích hoạt   │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 🚀 3. HƯỚNG DẪN CẬP NHẬT LÊN GITHUB & RENDER
+## 🛡️ 2. BẢO MẬT & ĐỘ ỔN ĐỊNH CAO CẤP (V5.0)
 
-Chạy lệnh hoặc tải các file sau lên GitHub của bạn:
-1. `database.py` (Hỗ trợ PostgreSQL + SQLite)
-2. `server.py` (Toàn bộ API V4.2)
-3. `requirements.txt` (Đã thêm `psycopg2-binary`)
-4. `index.html` & `static/index.html` (Kiosk tự động 24/7 kích hoạt 1 lần)
-5. `super_admin.html` & `static/super_admin.html` (Quản trị Super Admin đổi mật khẩu)
-6. `render.yaml`
+1. **Xác thực Bearer Token Độc Lập**:
+   - Toàn bộ API quản trị `/api/super-admin/*` và `/api/director/*` bắt buộc có header `Authorization: Bearer <token>`.
+   - Token ngẫu nhiên (32 bytes) được băm bằng SHA-256 trước khi lưu vào bảng `sessions` kèm thời hạn `expires_at`.
+2. **Kiosk Device Token (Phần Cứng Kiosk)**:
+   - Khi Giám Đốc kích hoạt Kiosk lần đầu, server cấp một `device_token` lưu băm trong bảng `kiosk_devices`.
+   - Endpoint `/api/kiosk/status` chỉ trả về link Google Form khi request gửi kèm `X-Device-Token` hợp lệ.
+3. **Mã Hóa Mật Khẩu Chuẩn Bcrypt & Tự Động Nâng Cấp**:
+   - Toàn bộ mật khẩu Super Admin và Giám Đốc được băm bằng thuật toán `bcrypt` (salt rounds 12).
+   - Hệ thống tự động phát hiện các hash SHA-256 cũ khi đăng nhập thành công và tự nâng cấp lên bcrypt mà không làm gián đoạn người dùng.
+4. **Chống Tấn Công Dò Mật Khẩu (Brute-Force Rate Limiting)**:
+   - Tự động theo dõi số lần đăng nhập sai theo IP (`ip:<client_ip>`) và theo tài khoản.
+   - Khóa tạm thời 15 phút nếu nhập sai quá 5 lần liên tiếp (HTTP 429 Too Many Requests).
+5. **Kiểm Tra Bản Quyền & Thời Gian Hết Hạn (`expires_at`)**:
+   - Endpoint `/api/kiosk/status` tự động so khớp `expires_at` với ngày hiện tại; nếu hết hạn sẽ lập tức khóa Kiosk như trạng thái `SUSPENDED`.
+6. **Chuẩn Hóa Link Google Form Thông Minh**:
+   - Khi Giám Đốc lưu link, server tự chuẩn hóa mọi link Google Form sang định dạng nhúng `/viewform?embedded=true`.
+   - Báo lỗi rõ ràng nếu link nhập vào không thuộc domain `docs.google.com/forms` hoặc `forms.gle`.
+7. **Connection Pool Cho PostgreSQL**:
+   - Sử dụng `psycopg2.pool.ThreadedConnectionPool` khi chạy với Cloud Database (Neon / Supabase), tự động tái sử dụng kết nối an toàn.
+8. **Chuẩn Hóa Tenant Code**:
+   - Mọi mã định danh tenant đều được tự động chuẩn hóa về chữ thường (`lowercase`) để tránh xung đột URL.
+
+---
+
+## ⚙️ 3. BIẾN MÔI TRƯỜNG (ENVIRONMENT VARIABLES)
+
+| Tên Biến | Ý Nghĩa | Giá Trị Mặc Định / Ví Dụ |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | Chuỗi kết nối PostgreSQL (Neon, Supabase, Render Postgres). Bỏ trống sẽ dùng SQLite cục bộ (`timeclock_saas.db`). | `postgresql://user:pass@host/db?sslmode=require` |
+| `SUPER_ADMIN_PASSWORD` | Mật khẩu khởi tạo cho Super Admin nếu chưa đổi trong DB. | Do hệ thống sinh ngẫu nhiên hoặc đặt riêng |
+| `PORT` | Cổng lắng nghe của máy chủ Web. | `10000` (Render) hoặc `8000` (Local) |
+
+---
+
+## 📁 4. CẤU TRÚC THƯ MỤC CHUẨN
+
+```text
+timeclock-saas-enterprise/
+├── server.py              # FastAPI Server V5.0: Bearer Auth, Kiosk Device Token, Rate Limiting, API
+├── database.py            # Database Engine V5.0: Postgres Pool, Bcrypt, Sessions, Idempotent Migrations
+├── requirements.txt       # fastapi, uvicorn, pydantic, psycopg2-binary, bcrypt
+├── render.yaml            # Cấu hình tự động triển khai lên Render Cloud
+├── .gitignore             # Loại bỏ *.db, .env, __pycache__
+├── index.html             # Giao diện Kiosk Chấm Công 24/7 & Cài Đặt Giám Đốc
+├── super_admin.html       # Trung Tâm Kiểm Soát Bản Quyền SaaS (Super Admin)
+└── static/
+    ├── index.html         # Bản sao tĩnh Kiosk
+    └── super_admin.html   # Bản sao tĩnh Super Admin
+```
+
+---
+
+## 🚀 5. KHỞI CHẠY & KIỂM THỬ
+
+### Chạy cục bộ:
+```bash
+pip install -r requirements.txt
+python server.py
+```
+- Mở Kiosk: `http://localhost:8000/?tenant=coffee-house`
+- Mở Super Admin: `http://localhost:8000/super-admin`
+
+### Kiểm thử tự động:
+```bash
+python -m pytest test_security_lifecycle.py
+```

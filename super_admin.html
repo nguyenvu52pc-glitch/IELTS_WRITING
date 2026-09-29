@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trung Tâm Quản Trị Bản Quyền SaaS (Super Admin) - Master Portal</title>
+  <title>Trung Tâm Kiểm Soát Bản Quyền SaaS - Super Admin Master</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -11,79 +11,157 @@
 
   <style>
     :root {
-      --bg-dark: #07080b;
-      --bg-surface: #0e1118;
-      --bg-card: #131622;
-      --bg-input: #090b10;
+      --bg-master: #0a0c10;
+      --bg-surface: #10141d;
+      --bg-card: #151924;
+      --bg-input: #0d1017;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(229, 9, 20, 0.5);
       --primary-red: #e50914;
       --primary-red-hover: #ff1e2b;
-      --accent-green: #10b981;
-      --accent-gold: #f59e0b;
+      --accent-gold: #ffb703;
+      --accent-green: #00e676;
+      --accent-purple: #a855f7;
+      --accent-blue: #3b82f6;
       --text-white: #ffffff;
       --text-muted: #cbd5e1;
-      --text-dim: #94a3b8;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --font-main: 'Montserrat', sans-serif;
+      --text-dim: #64748b;
+      --font-heading: 'Montserrat', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
-    body { background-color: var(--bg-dark); color: var(--text-white); min-height: 100vh; overflow-x: hidden; position: relative; }
-    .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-heading);
+      background-color: var(--bg-master);
+      color: var(--text-white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bg-grid {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
 
     /* AUTH OVERLAY */
-    .admin-auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(7, 8, 11, 0.96); backdrop-filter: blur(14px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .auth-box { background: var(--bg-card); border: 1.5px solid rgba(229, 9, 20, 0.5); border-radius: 20px; padding: 40px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 0 60px rgba(229, 9, 20, 0.4); display: flex; flex-direction: column; gap: 20px; }
-    .auth-icon-circle { width: 68px; height: 68px; background: rgba(229, 9, 20, 0.15); border: 2px solid var(--primary-red); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #ff5252; }
-    .auth-box h2 { font-size: 1.4rem; font-weight: 900; letter-spacing: 0.5px; }
-    .auth-box input { background: var(--bg-input); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 14px 18px; color: #fff; font-size: 1rem; outline: none; text-align: center; font-family: var(--font-mono); transition: all 0.2s; }
-    .auth-box input:focus { border-color: var(--primary-red); box-shadow: 0 0 15px rgba(229, 9, 20, 0.4); background: #0f121a; }
+    .admin-auth-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(8, 10, 14, 0.96); backdrop-filter: blur(14px);
+      z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+
+    .auth-box {
+      background: var(--bg-card); border: 1.5px solid var(--border-active);
+      border-radius: 20px; padding: 44px 36px; max-width: 440px; width: 100%;
+      text-align: center; box-shadow: 0 0 60px rgba(229, 9, 20, 0.35);
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .auth-icon-circle {
+      width: 72px; height: 72px; background: rgba(229, 9, 20, 0.15);
+      border: 1.5px solid var(--primary-red); border-radius: 50%; margin: 0 auto;
+      display: flex; align-items: center; justify-content: center; color: #ff5252;
+    }
 
     /* MAIN WRAPPER */
-    .master-wrapper { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 30px 24px 60px 24px; display: flex; flex-direction: column; gap: 28px; }
-    .master-header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 22px 30px; border-radius: 16px; border: 1px solid var(--border-subtle); border-left: 6px solid var(--primary-red); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); }
-    .master-title-box h1 { font-size: 1.55rem; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; }
-    .master-title-box p { font-size: 0.88rem; color: var(--text-dim); margin-top: 4px; }
+    .master-wrapper {
+      position: relative; z-index: 1; display: flex; flex-direction: column;
+      flex: 1; padding: 28px 40px; gap: 24px; max-width: 1600px; margin: 0 auto; width: 100%;
+    }
+
+    /* HEADER */
+    .master-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 28px; background: var(--bg-surface);
+      border: 1px solid var(--border-subtle); border-left: 5px solid var(--primary-red);
+      border-radius: var(--radius);
+    }
+
+    .master-title-box h1 {
+      font-size: 1.35rem; font-weight: 900; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .master-title-box p { font-size: 0.82rem; color: var(--text-dim); margin-top: 4px; }
 
     /* STATS CARDS */
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    @media (max-width: 800px) { .stats-row { grid-template-columns: 1fr; } }
-    .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .stat-meta h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); margin-bottom: 6px; }
-    .stat-meta .stat-val { font-size: 2rem; font-weight: 900; font-family: var(--font-mono); }
+    .stat-card {
+      background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius); padding: 20px 24px; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .stat-meta h4 { font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+    .stat-val { font-size: 2.2rem; font-family: var(--font-mono); font-weight: 900; margin-top: 4px; }
     .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 
-    /* GRID */
-    .master-grid { display: grid; grid-template-columns: 380px 1fr; gap: 28px; }
-    @media (max-width: 1080px) { .master-grid { grid-template-columns: 1fr; } }
-    .master-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); }
-    .card-title { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; }
-    .card-title svg { width: 22px; height: 22px; color: var(--primary-red); }
+    /* GRID CHÍNH */
+    .master-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
+    @media (max-width: 1100px) { .master-grid { grid-template-columns: 1fr; } }
 
-    /* FORM CONTROLS */
+    .master-card {
+      background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 16px;
+    }
+
+    .card-title {
+      font-size: 1.05rem; font-weight: 800; display: flex; align-items: center;
+      gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;
+    }
+
+    /* INPUTS & FORMS */
     .input-group { display: flex; flex-direction: column; gap: 6px; }
-    .input-group label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .input-group input, .input-group select { width: 100%; background: var(--bg-input); border: 1.5px solid rgba(255, 255, 255, 0.12); border-radius: 10px; padding: 12px 16px; color: #ffffff; font-size: 0.9rem; outline: none; transition: all 0.2s; }
-    .input-group input:focus { border-color: var(--primary-red); background: #0f121a; box-shadow: 0 0 16px rgba(229, 9, 20, 0.4); }
+    .input-group label { font-size: 0.76rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+    .input-group input, .input-group select {
+      background: var(--bg-input); border: 1px solid var(--border-subtle);
+      border-radius: 8px; padding: 11px 14px; color: #fff; font-size: 0.9rem; outline: none; transition: all 0.2s;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: var(--primary-red); box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
+    }
 
-    .plan-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.12); transition: all 0.2s ease; color: #fff; }
-    .btn-red { background: linear-gradient(135deg, var(--primary-red) 0%, #b8050e 100%); color: #fff !important; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4); }
-    .btn-red:hover { background: var(--primary-red-hover); transform: translateY(-2px); box-shadow: 0 6px 25px rgba(229, 9, 20, 0.65); }
+    .plan-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 16px; border-radius: 8px; font-weight: 800; font-size: 0.85rem;
+      cursor: pointer; border: 1px solid transparent; transition: all 0.2s; color: #fff;
+    }
+    .btn-red { background: linear-gradient(135deg, var(--primary-red) 0%, #a8050e 100%); }
+    .btn-red:hover { background: var(--primary-red-hover); transform: translateY(-1px); }
 
-    /* DATA TABLE */
-    .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-subtle); }
-    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.88rem; }
-    .data-table th { background: #090b10; padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-subtle); }
-    .data-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: var(--text-muted); vertical-align: middle; }
-    .data-table tr:hover td { background: rgba(255, 255, 255, 0.025); }
+    /* TABLE */
+    .table-container { overflow-x: auto; margin-top: 8px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    .data-table th {
+      background: #090c12; color: var(--text-dim); font-size: 0.74rem;
+      font-weight: 800; text-transform: uppercase; text-align: left; padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .data-table td { padding: 14px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+    .data-table tr:hover { background: rgba(255, 255, 255, 0.02); }
 
+    /* BADGES */
     .badge-active { display: inline-flex; align-items: center; gap: 5px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
     .badge-suspended { display: inline-flex; align-items: center; gap: 5px; background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
+
+    /* PLAN TIER BADGES */
+    .badge-plan-enterprise { display: inline-flex; align-items: center; gap: 5px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
+    .badge-plan-pro { display: inline-flex; align-items: center; gap: 5px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
+    .badge-plan-basic { display: inline-flex; align-items: center; gap: 5px; background: rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.4); color: #cbd5e1; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
 
     .btn-toggle-suspend { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 800; transition: all 0.2s; }
     .btn-toggle-suspend:hover { background: var(--primary-red); color: #fff; }
     .btn-toggle-activate { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 800; transition: all 0.2s; }
     .btn-toggle-activate:hover { background: #10b981; color: #fff; }
+
+    .btn-action-small { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+    .btn-action-small:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
 
     .btn-del { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); color: #94a3b8; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700; }
     .btn-del:hover { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
@@ -91,12 +169,17 @@
     .link-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-family: var(--font-mono); color: #60a5fa; text-decoration: none; font-weight: 700; }
     .link-chip:hover { border-color: #60a5fa; background: rgba(96, 165, 250, 0.15); }
 
-    /* MODAL */
+    /* MODALS */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(12px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
-    .modal-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 18px; padding: 32px; max-width: 440px; width: 100%; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+    .modal-box { background: var(--bg-card); border: 1.5px solid var(--border-subtle); border-radius: 20px; padding: 32px; max-width: 480px; width: 100%; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
 
     .db-badge-cloud { display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; }
     .db-badge-local { display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; }
+
+    /* QUICK DURATION BUTTONS */
+    .quick-durations { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .btn-quick-dur { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); color: var(--text-dim); padding: 5px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-quick-dur:hover { background: rgba(229, 9, 20, 0.2); color: #ff6b6b; border-color: rgba(229, 9, 20, 0.4); }
 
     /* Toast */
     .toast { position: fixed; bottom: 28px; right: 28px; background: #181b26; border-left: 4px solid var(--primary-red); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 14px 24px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; z-index: 12000; pointer-events: none; }
@@ -109,19 +192,19 @@
   <!-- CỔNG XÁC THỰC MẬT KHẨU SUPER ADMIN -->
   <div id="superAuthOverlay" class="admin-auth-overlay">
     <div class="auth-box">
-      <div class="auth-icon-circle"><i data-lucide="shield-check" style="width: 34px; height: 34px;"></i></div>
-      <h2>SUPER ADMIN BẢN QUYỀN</h2>
-      <p style="font-size: 0.86rem; color: var(--text-dim);">
-        Cổng kiểm soát trung tâm SaaS dành riêng cho Nhà cung cấp phần mềm. Vui lòng nhập mật khẩu chủ:
+      <div class="auth-icon-circle"><i data-lucide="shield-check" style="width: 36px; height: 36px;"></i></div>
+      <h2 style="font-size: 1.4rem; font-weight: 900;">SUPER ADMIN BẢN QUYỀN</h2>
+      <p style="font-size: 0.86rem; color: var(--text-dim); line-height: 1.5;">
+        Cổng kiểm soát trung tâm SaaS dành riêng cho Bạn (Chủ phần mềm). Vui lòng nhập mật khẩu Super Admin:
       </p>
-      <input type="password" id="masterPassInput" placeholder="Nhập mật khẩu Super Admin..." autofocus autocomplete="off">
+      <input type="password" id="masterPassInput" placeholder="Nhập mật khẩu Super Admin..." autofocus autocomplete="off" style="background: var(--bg-input); border: 1.5px solid var(--border-subtle); border-radius: 10px; padding: 13px 16px; color: #fff; font-size: 0.95rem; outline: none;">
       <button id="btnMasterLogin" class="plan-btn btn-red" style="padding: 14px;">
         <i data-lucide="unlock"></i> ĐĂNG NHẬP TRUNG TÂM KIỂM SOÁT
       </button>
     </div>
   </div>
 
-  <!-- MODAL ĐỔI MẬT KHẨU SUPER ADMIN -->
+  <!-- MODAL 1: ĐỔI MẬT KHẨU SUPER ADMIN -->
   <div id="changePassModal" class="modal-overlay">
     <div class="modal-box">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
@@ -132,8 +215,8 @@
       </div>
       
       <div class="input-group">
-        <label>Mật Khẩu Hiện Tại (*):</label>
-        <input type="password" id="inputOldSuperPass" placeholder="Nhập mật khẩu cũ...">
+        <label>Mật Khẩu Super Admin Hiện Tại (*):</label>
+        <input type="password" id="inputOldSuperPass" placeholder="Nhập mật khẩu hiện tại...">
       </div>
 
       <div class="input-group">
@@ -155,6 +238,54 @@
     </div>
   </div>
 
+  <!-- MODAL 2: GIA HẠN & ĐIỀU CHỈNH GÓI CHO KHÁCH HÀNG -->
+  <div id="subscriptionModal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="calendar-clock" style="color: #60a5fa;"></i> Điều Chỉnh Gói & Hạn Bản Quyền
+        </h3>
+        <button onclick="closeSubscriptionModal()" class="btn-del"><i data-lucide="x"></i></button>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.03); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+        <div style="font-size: 0.95rem; font-weight: 800; color: #fff;" id="subModalCompanyName">TÊN CÔNG TY</div>
+        <div style="font-size: 0.78rem; font-family: var(--font-mono); color: #8ab4f8; margin-top: 2px;">Mã Tenant: <span id="subModalTenantCode">tenant</span></div>
+      </div>
+      
+      <input type="hidden" id="subModalEntId" value="">
+
+      <div class="input-group">
+        <label>Gói Khách Hàng Đang Sử Dụng:</label>
+        <select id="subModalPlanTier">
+          <option value="ENTERPRISE">Gói Doanh Nghiệp (ENTERPRISE - Không giới hạn)</option>
+          <option value="PRO">Gói Chuyên Nghiệp (PRO)</option>
+          <option value="BASIC">Gói Cơ Bản (BASIC)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Thời Gian Hết Hạn Bản Quyền (YYYY-MM-DD):</label>
+        <input type="date" id="subModalExpireDate">
+        <div class="quick-durations">
+          <span style="font-size: 0.72rem; color: var(--text-dim); display: flex; align-items: center; margin-right: 4px;">Cộng nhanh:</span>
+          <button type="button" class="btn-quick-dur" onclick="extendQuickDays(30)">+1 Tháng</button>
+          <button type="button" class="btn-quick-dur" onclick="extendQuickDays(90)">+3 Tháng</button>
+          <button type="button" class="btn-quick-dur" onclick="extendQuickDays(180)">+6 Tháng</button>
+          <button type="button" class="btn-quick-dur" onclick="extendQuickDays(365)">+1 Năm</button>
+          <button type="button" class="btn-quick-dur" onclick="setPermanentDate()">Vĩnh Viễn</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button id="btnSaveSubscription" class="plan-btn btn-red" style="flex: 1;">
+          <i data-lucide="save"></i> Lưu Thay Đổi Hạn & Gói
+        </button>
+        <button onclick="closeSubscriptionModal()" class="plan-btn" style="background: rgba(255,255,255,0.08);">Hủy</button>
+      </div>
+    </div>
+  </div>
+
   <!-- GIAO DIỆN CHÍNH SUPER ADMIN -->
   <div class="master-wrapper" id="masterContentWrapper" style="display: none;">
     <!-- Header -->
@@ -165,8 +296,8 @@
       </div>
       <div style="display: flex; gap: 10px; align-items: center;">
         <div id="dbStatusBadge" class="db-badge-local"><i data-lucide="database"></i> Đang tải...</div>
-        <button onclick="openChangePassModal()" class="plan-btn" style="background: rgba(255,255,255,0.08);" title="Đổi mật khẩu Super Admin">
-          <i data-lucide="key"></i> Đổi Mật Khẩu
+        <button onclick="openChangePassModal()" class="plan-btn" style="background: rgba(229, 9, 20, 0.15); border-color: rgba(229, 9, 20, 0.4); color: #ff6b6b;" title="Đổi mật khẩu Super Admin">
+          <i data-lucide="key"></i> Đổi Mật Khẩu Super Admin
         </button>
         <button id="btnMasterLogout" class="plan-btn" style="background: rgba(255,255,255,0.08);">
           <i data-lucide="log-out"></i> Đăng Xuất
@@ -229,16 +360,27 @@
 
         <div class="input-group">
           <label>Mật Khẩu Giám Đốc Ban Đầu (*):</label>
-          <input type="password" id="newDirectorPass" placeholder="Đặt mật khẩu Giám Đốc..." autocomplete="off">
+          <input type="password" id="newDirectorPass" placeholder="Đặt mật khẩu Giám Đốc ban đầu..." autocomplete="off">
         </div>
 
         <div class="input-group">
-          <label>Gói Cước & Thời Hạn:</label>
+          <label>Gói Khách Hàng Đăng Ký:</label>
+          <select id="newPlanTier">
+            <option value="ENTERPRISE">Gói Doanh Nghiệp (ENTERPRISE)</option>
+            <option value="PRO">Gói Chuyên Nghiệp (PRO)</option>
+            <option value="BASIC">Gói Cơ Bản (BASIC)</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Thời Hạn Bản Quyền Ban Đầu:</label>
           <select id="newPlanDays">
-            <option value="365">Gói 1 Năm (365 Ngày) - Doanh Nghiệp</option>
+            <option value="365">Gói 1 Năm (365 Ngày)</option>
             <option value="180">Gói 6 Tháng (180 Ngày)</option>
-            <option value="30">Dùng Thử (30 Ngày)</option>
+            <option value="90">Gói 3 Tháng (90 Ngày)</option>
+            <option value="30">Gói 1 Tháng / Thử Nghiệm (30 Ngày)</option>
             <option value="1095">Gói 3 Năm (1095 Ngày)</option>
+            <option value="9999">Trọn Đời (Vĩnh Viễn)</option>
           </select>
         </div>
 
@@ -262,6 +404,7 @@
               <tr>
                 <th>Tên Công Ty / Tenant</th>
                 <th>Link Kiosk Điểm Danh</th>
+                <th>Gói Đang Dùng</th>
                 <th>Hạn Bản Quyền</th>
                 <th>Trạng Thái</th>
                 <th>Thao Tác Bản Quyền</th>
@@ -279,6 +422,27 @@
   <div id="toast" class="toast">Thông báo</div>
 
   <script>
+    // Helper lấy header Authorization Bearer Token
+    function getAuthHeaders(extraHeaders = {}) {
+      const token = sessionStorage.getItem("super_admin_token") || "";
+      return {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json",
+        ...extraHeaders
+      };
+    }
+
+    // Helper xử lý phản hồi 401 hết hạn token
+    function handleAuthError(res) {
+      if (res.status === 401) {
+        sessionStorage.removeItem("super_admin_token");
+        checkSuperAuth();
+        showToast("Phiên đăng nhập đã hết hạn! Vui lòng đăng nhập lại.");
+        return true;
+      }
+      return false;
+    }
+
     function checkSuperAuth() {
       const token = sessionStorage.getItem("super_admin_token");
       if (token) {
@@ -307,6 +471,7 @@
 
         if (res.ok && data.success) {
           sessionStorage.setItem("super_admin_token", data.token);
+          document.getElementById("masterPassInput").value = "";
           checkSuperAuth();
           showToast("Đăng nhập Super Admin thành công!");
         } else {
@@ -326,7 +491,7 @@
       checkSuperAuth();
     });
 
-    // Đổi mật khẩu Super Admin
+    // 1. ĐỔI MẬT KHẨU SUPER ADMIN (GỬI KÈM BEARER TOKEN)
     function openChangePassModal() {
       document.getElementById("changePassModal").style.display = "flex";
       document.getElementById("inputOldSuperPass").value = "";
@@ -350,9 +515,12 @@
       try {
         const res = await fetch("/api/super-admin/change-password", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify({ old_password: oldP, new_password: newP })
         });
+
+        if (handleAuthError(res)) return;
+
         const text = await res.text();
         let data;
         try { data = JSON.parse(text); } catch(e) { data = { detail: text }; }
@@ -368,9 +536,80 @@
       }
     });
 
+    // 2. GIA HẠN & ĐIỀU CHỈNH GÓI CHO TỪNG KHÁCH HÀNG (GỬI KÈM BEARER TOKEN)
+    window.openSubscriptionModal = function(id, name, tenant, plan, exp) {
+      document.getElementById("subModalEntId").value = id;
+      document.getElementById("subModalCompanyName").textContent = name;
+      document.getElementById("subModalTenantCode").textContent = tenant;
+      document.getElementById("subModalPlanTier").value = plan || "ENTERPRISE";
+      
+      if (exp && exp.includes("-")) {
+        document.getElementById("subModalExpireDate").value = exp.split(" ")[0];
+      } else {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + 1);
+        document.getElementById("subModalExpireDate").value = d.toISOString().split("T")[0];
+      }
+
+      document.getElementById("subscriptionModal").style.display = "flex";
+    };
+
+    function closeSubscriptionModal() {
+      document.getElementById("subscriptionModal").style.display = "none";
+    }
+
+    window.extendQuickDays = function(days) {
+      const curInput = document.getElementById("subModalExpireDate").value;
+      let baseDate = curInput ? new Date(curInput) : new Date();
+      if (isNaN(baseDate.getTime()) || baseDate < new Date()) {
+        baseDate = new Date();
+      }
+      baseDate.setDate(baseDate.getDate() + days);
+      document.getElementById("subModalExpireDate").value = baseDate.toISOString().split("T")[0];
+    };
+
+    window.setPermanentDate = function() {
+      document.getElementById("subModalExpireDate").value = "2099-12-31";
+    };
+
+    document.getElementById("btnSaveSubscription").addEventListener("click", async () => {
+      const entId = document.getElementById("subModalEntId").value;
+      const planTier = document.getElementById("subModalPlanTier").value;
+      const expDate = document.getElementById("subModalExpireDate").value;
+
+      if (!expDate) return showToast("Vui lòng chọn ngày hết hạn!");
+
+      try {
+        const res = await fetch(`/api/super-admin/enterprises/${entId}/subscription`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ plan_tier: planTier, expires_at: expDate })
+        });
+
+        if (handleAuthError(res)) return;
+
+        const data = await res.json();
+        if (res.ok) {
+          showToast(data.message);
+          closeSubscriptionModal();
+          loadEnterprises();
+        } else {
+          showToast(data.detail || "Không thể cập nhật thời hạn!");
+        }
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    });
+
+    // 3. NẠP DANH SÁCH DOANH NGHIỆP (GỬI KÈM BEARER TOKEN)
     async function loadEnterprises() {
       try {
-        const res = await fetch("/api/super-admin/enterprises");
+        const res = await fetch("/api/super-admin/enterprises", {
+          headers: getAuthHeaders()
+        });
+
+        if (handleAuthError(res)) return;
+
         const data = await res.json();
         const tbody = document.getElementById("enterprisesTableBody");
         tbody.innerHTML = "";
@@ -398,6 +637,22 @@
           const tr = document.createElement("tr");
           const kioskUrl = `${currentOrigin}/?tenant=${ent.tenant_code}`;
 
+          // Format plan badge
+          const tier = (ent.plan_tier || "ENTERPRISE").toUpperCase();
+          let tierBadgeClass = "badge-plan-enterprise";
+          let tierLabel = "DOANH NGHIỆP";
+          if (tier === "PRO") {
+            tierBadgeClass = "badge-plan-pro";
+            tierLabel = "CHUYÊN NGHIỆP";
+          } else if (tier === "BASIC") {
+            tierBadgeClass = "badge-plan-basic";
+            tierLabel = "CƠ BẢN";
+          }
+
+          // Format expiration text
+          const exp = ent.expires_at || "Vĩnh viễn";
+          const isPermanent = exp.startsWith("2099") || exp.toLowerCase().includes("vĩnh");
+
           tr.innerHTML = `
             <td>
               <div style="font-weight: 800; color: #fff; font-size: 0.95rem;">${ent.company_name}</div>
@@ -408,8 +663,21 @@
                 <i data-lucide="external-link" style="width: 13px; height: 13px;"></i> /?tenant=${ent.tenant_code}
               </a>
             </td>
-            <td style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-dim);">
-              ${ent.expires_at || 'Vĩnh viễn'}
+            <td>
+              <span class="${tierBadgeClass}">
+                <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i>
+                ${tierLabel}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.84rem; font-family: var(--font-mono); color: ${isPermanent ? '#34d399' : '#fff'}; font-weight: 700;">
+                  ${isPermanent ? 'Trọn Đời (Vĩnh Viễn)' : exp}
+                </span>
+                <button class="btn-action-small" onclick="openSubscriptionModal(${ent.id}, '${ent.company_name.replace(/'/g, "\\'")}', '${ent.tenant_code}', '${tier}', '${exp}')" title="Điều chỉnh gói & hạn dùng">
+                  <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i> Sửa
+                </button>
+              </div>
             </td>
             <td>
               <span class="${isActive ? 'badge-active' : 'badge-suspended'}">
@@ -422,7 +690,7 @@
                 <button class="${isActive ? 'btn-toggle-suspend' : 'btn-toggle-activate'}" onclick="toggleStatus(${ent.id})">
                   ${isActive ? 'Khóa Bản Quyền' : 'Kích Hoạt Lại'}
                 </button>
-                <button class="btn-del" onclick="deleteEnterprise(${ent.id}, '${ent.company_name}')" title="Xóa vĩnh viễn">
+                <button class="btn-del" onclick="deleteEnterprise(${ent.id}, '${ent.company_name.replace(/'/g, "\\'")}')" title="Xóa vĩnh viễn">
                   <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
                 </button>
               </div>
@@ -437,11 +705,12 @@
       }
     }
 
-    // Cấp bản quyền công ty mới
+    // 4. CẤP BẢN QUYỀN CÔNG TY MỚI (GỬI KÈM BEARER TOKEN)
     document.getElementById("btnCreateEnterprise").addEventListener("click", async () => {
       const cName = document.getElementById("newCompanyName").value.trim();
       const tCode = document.getElementById("newTenantCode").value.trim().toLowerCase();
       const dPass = document.getElementById("newDirectorPass").value.trim();
+      const planTier = document.getElementById("newPlanTier").value;
       const days = parseInt(document.getElementById("newPlanDays").value);
 
       if (!cName || !tCode || !dPass) {
@@ -451,26 +720,30 @@
       try {
         const res = await fetch("/api/super-admin/enterprises", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify({
             company_name: cName,
             tenant_code: tCode,
             director_password: dPass,
+            plan_tier: planTier,
             days_valid: days
           })
         });
+
+        if (handleAuthError(res)) return;
+
         const text = await res.text();
         let data;
         try { data = JSON.parse(text); } catch (e) { data = { detail: text }; }
 
-        if (res.ok) {
-          showToast(data.message || "Cấp bản quyền thành công!");
+        if (res.ok && data.success) {
+          showToast(data.message);
           document.getElementById("newCompanyName").value = "";
           document.getElementById("newTenantCode").value = "";
           document.getElementById("newDirectorPass").value = "";
           loadEnterprises();
         } else {
-          showToast(data.detail || "Không thể cấp bản quyền!");
+          showToast(data.detail || "Không thể tạo công ty!");
         }
       } catch (err) {
         showToast("Lỗi: " + err.message);
@@ -479,7 +752,13 @@
 
     window.toggleStatus = async function(id) {
       try {
-        const res = await fetch(`/api/super-admin/enterprises/${id}/toggle`, { method: "POST" });
+        const res = await fetch(`/api/super-admin/enterprises/${id}/toggle`, {
+          method: "POST",
+          headers: getAuthHeaders()
+        });
+
+        if (handleAuthError(res)) return;
+
         const data = await res.json();
         showToast(data.message);
         loadEnterprises();
@@ -489,9 +768,15 @@
     };
 
     window.deleteEnterprise = async function(id, name) {
-      if (confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn công ty "${name}" khỏi hệ thống?`)) {
+      if (confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn công ty "${name}"?`)) {
         try {
-          const res = await fetch(`/api/super-admin/enterprises/${id}`, { method: "DELETE" });
+          const res = await fetch(`/api/super-admin/enterprises/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeaders()
+          });
+
+          if (handleAuthError(res)) return;
+
           const data = await res.json();
           showToast(data.message);
           loadEnterprises();
