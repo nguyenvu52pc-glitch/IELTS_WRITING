@@ -27,435 +27,80 @@
       --font-mono: 'JetBrains Mono', monospace;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: var(--font-main);
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-white);
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    .bg-grid {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+    body { background-color: var(--bg-dark); color: var(--text-white); min-height: 100vh; overflow-x: hidden; position: relative; }
+    .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
 
     /* AUTH OVERLAY */
-    .admin-auth-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(7, 8, 11, 0.96);
-      backdrop-filter: blur(14px);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .auth-box {
-      background: var(--bg-card);
-      border: 1.5px solid rgba(229, 9, 20, 0.5);
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 440px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 0 60px rgba(229, 9, 20, 0.4);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .auth-icon-circle {
-      width: 68px; height: 68px;
-      background: rgba(229, 9, 20, 0.15);
-      border: 2px solid var(--primary-red);
-      border-radius: 50%;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ff5252;
-    }
-
-    .auth-box h2 {
-      font-size: 1.4rem;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-    }
-
-    .auth-box input {
-      background: var(--bg-input);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      padding: 14px 18px;
-      color: #fff;
-      font-size: 1rem;
-      outline: none;
-      text-align: center;
-      font-family: var(--font-mono);
-      transition: all 0.2s;
-    }
-
-    .auth-box input:focus {
-      border-color: var(--primary-red);
-      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
-      background: #0f121a;
-    }
+    .admin-auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(7, 8, 11, 0.96); backdrop-filter: blur(14px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-box { background: var(--bg-card); border: 1.5px solid rgba(229, 9, 20, 0.5); border-radius: 20px; padding: 40px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 0 60px rgba(229, 9, 20, 0.4); display: flex; flex-direction: column; gap: 20px; }
+    .auth-icon-circle { width: 68px; height: 68px; background: rgba(229, 9, 20, 0.15); border: 2px solid var(--primary-red); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #ff5252; }
+    .auth-box h2 { font-size: 1.4rem; font-weight: 900; letter-spacing: 0.5px; }
+    .auth-box input { background: var(--bg-input); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 14px 18px; color: #fff; font-size: 1rem; outline: none; text-align: center; font-family: var(--font-mono); transition: all 0.2s; }
+    .auth-box input:focus { border-color: var(--primary-red); box-shadow: 0 0 15px rgba(229, 9, 20, 0.4); background: #0f121a; }
 
     /* MAIN WRAPPER */
-    .master-wrapper {
-      position: relative;
-      z-index: 1;
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 30px 24px 60px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
-
-    .master-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-surface);
-      padding: 22px 30px;
-      border-radius: 16px;
-      border: 1px solid var(--border-subtle);
-      border-left: 6px solid var(--primary-red);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .master-title-box h1 {
-      font-size: 1.55rem;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .master-title-box p {
-      font-size: 0.88rem;
-      color: var(--text-dim);
-      margin-top: 4px;
-    }
+    .master-wrapper { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 30px 24px 60px 24px; display: flex; flex-direction: column; gap: 28px; }
+    .master-header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 22px 30px; border-radius: 16px; border: 1px solid var(--border-subtle); border-left: 6px solid var(--primary-red); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); }
+    .master-title-box h1 { font-size: 1.55rem; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; }
+    .master-title-box p { font-size: 0.88rem; color: var(--text-dim); margin-top: 4px; }
 
     /* STATS CARDS */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    @media (max-width: 800px) {
-      .stats-row { grid-template-columns: 1fr; }
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .stat-meta h4 {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-    }
-
-    .stat-meta .stat-val {
-      font-size: 2rem;
-      font-weight: 900;
-      font-family: var(--font-mono);
-    }
-
-    .stat-icon {
-      width: 48px; height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 800px) { .stats-row { grid-template-columns: 1fr; } }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .stat-meta h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); margin-bottom: 6px; }
+    .stat-meta .stat-val { font-size: 2rem; font-weight: 900; font-family: var(--font-mono); }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 
     /* GRID */
-    .master-grid {
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 28px;
-    }
-
-    @media (max-width: 1080px) {
-      .master-grid { grid-template-columns: 1fr; }
-    }
-
-    .master-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 26px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 14px;
-    }
-
-    .card-title svg {
-      width: 22px; height: 22px;
-      color: var(--primary-red);
-    }
+    .master-grid { display: grid; grid-template-columns: 380px 1fr; gap: 28px; }
+    @media (max-width: 1080px) { .master-grid { grid-template-columns: 1fr; } }
+    .master-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); }
+    .card-title { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; }
+    .card-title svg { width: 22px; height: 22px; color: var(--primary-red); }
 
     /* FORM CONTROLS */
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-group label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .input-group input, .input-group select { width: 100%; background: var(--bg-input); border: 1.5px solid rgba(255, 255, 255, 0.12); border-radius: 10px; padding: 12px 16px; color: #ffffff; font-size: 0.9rem; outline: none; transition: all 0.2s; }
+    .input-group input:focus { border-color: var(--primary-red); background: #0f121a; box-shadow: 0 0 16px rgba(229, 9, 20, 0.4); }
 
-    .input-group label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .input-group input, .input-group select {
-      width: 100%;
-      background: var(--bg-input);
-      border: 1.5px solid rgba(255, 255, 255, 0.12);
-      border-radius: 10px;
-      padding: 12px 16px;
-      color: #ffffff;
-      font-size: 0.9rem;
-      outline: none;
-      transition: all 0.2s;
-    }
-
-    .input-group input:focus {
-      border-color: var(--primary-red);
-      background: #0f121a;
-      box-shadow: 0 0 16px rgba(229, 9, 20, 0.4);
-    }
-
-    .plan-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 13px 20px;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 0.9rem;
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      transition: all 0.2s ease;
-      color: #fff;
-    }
-
-    .btn-red {
-      background: linear-gradient(135deg, var(--primary-red) 0%, #b8050e 100%);
-      color: #fff !important;
-      box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4);
-    }
-
-    .btn-red:hover {
-      background: var(--primary-red-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(229, 9, 20, 0.65);
-    }
+    .plan-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.12); transition: all 0.2s ease; color: #fff; }
+    .btn-red { background: linear-gradient(135deg, var(--primary-red) 0%, #b8050e 100%); color: #fff !important; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4); }
+    .btn-red:hover { background: var(--primary-red-hover); transform: translateY(-2px); box-shadow: 0 6px 25px rgba(229, 9, 20, 0.65); }
 
     /* DATA TABLE */
-    .table-container {
-      overflow-x: auto;
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-    }
+    .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-subtle); }
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.88rem; }
+    .data-table th { background: #090b10; padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-subtle); }
+    .data-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: var(--text-muted); vertical-align: middle; }
+    .data-table tr:hover td { background: rgba(255, 255, 255, 0.025); }
 
-    .data-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 0.88rem;
-    }
+    .badge-active { display: inline-flex; align-items: center; gap: 5px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
+    .badge-suspended { display: inline-flex; align-items: center; gap: 5px; background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
 
-    .data-table th {
-      background: #090b10;
-      padding: 14px 16px;
-      text-align: left;
-      font-weight: 700;
-      color: var(--text-dim);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 2px solid var(--border-subtle);
-    }
+    .btn-toggle-suspend { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 800; transition: all 0.2s; }
+    .btn-toggle-suspend:hover { background: var(--primary-red); color: #fff; }
+    .btn-toggle-activate { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 800; transition: all 0.2s; }
+    .btn-toggle-activate:hover { background: #10b981; color: #fff; }
 
-    .data-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      vertical-align: middle;
-    }
+    .btn-del { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); color: #94a3b8; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700; }
+    .btn-del:hover { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
 
-    .data-table tr:hover td {
-      background: rgba(255, 255, 255, 0.025);
-    }
+    .link-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-family: var(--font-mono); color: #60a5fa; text-decoration: none; font-weight: 700; }
+    .link-chip:hover { border-color: #60a5fa; background: rgba(96, 165, 250, 0.15); }
 
-    .badge-active {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.74rem;
-      font-weight: 800;
-    }
+    /* MODAL */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(12px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 18px; padding: 32px; max-width: 440px; width: 100%; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
 
-    .badge-suspended {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(239, 68, 68, 0.18);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      color: #f87171;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.74rem;
-      font-weight: 800;
-    }
-
-    .btn-toggle-suspend {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #f87171;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-weight: 800;
-      transition: all 0.2s;
-    }
-
-    .btn-toggle-suspend:hover {
-      background: var(--primary-red);
-      color: #fff;
-    }
-
-    .btn-toggle-activate {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-weight: 800;
-      transition: all 0.2s;
-    }
-
-    .btn-toggle-activate:hover {
-      background: #10b981;
-      color: #fff;
-    }
-
-    .btn-del {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-subtle);
-      color: #94a3b8;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .btn-del:hover {
-      background: rgba(239, 68, 68, 0.2);
-      color: #f87171;
-      border-color: rgba(239, 68, 68, 0.4);
-    }
-
-    .link-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-      color: #60a5fa;
-      text-decoration: none;
-    }
-
-    .link-chip:hover {
-      border-color: #60a5fa;
-      background: rgba(96, 165, 250, 0.1);
-    }
+    .db-badge-cloud { display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; }
+    .db-badge-local { display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; }
 
     /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 28px; right: 28px;
-      background: #181b26;
-      border-left: 4px solid var(--primary-red);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 14px 24px;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.3s ease;
-      z-index: 10000;
-      pointer-events: none;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
+    .toast { position: fixed; bottom: 28px; right: 28px; background: #181b26; border-left: 4px solid var(--primary-red); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 14px 24px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; z-index: 12000; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
   </style>
 </head>
 <body>
@@ -476,6 +121,40 @@
     </div>
   </div>
 
+  <!-- MODAL ĐỔI MẬT KHẨU SUPER ADMIN -->
+  <div id="changePassModal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="key-round" style="color: var(--primary-red);"></i> Đổi Mật Khẩu Super Admin
+        </h3>
+        <button onclick="closeChangePassModal()" class="btn-del"><i data-lucide="x"></i></button>
+      </div>
+      
+      <div class="input-group">
+        <label>Mật Khẩu Hiện Tại (*):</label>
+        <input type="password" id="inputOldSuperPass" placeholder="Nhập mật khẩu cũ...">
+      </div>
+
+      <div class="input-group">
+        <label>Mật Khẩu Mới (Tối thiểu 6 ký tự) (*):</label>
+        <input type="password" id="inputNewSuperPass" placeholder="Nhập mật khẩu mới...">
+      </div>
+
+      <div class="input-group">
+        <label>Xác Nhận Mật Khẩu Mới (*):</label>
+        <input type="password" id="inputConfirmSuperPass" placeholder="Xác nhận mật khẩu mới...">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button id="btnSubmitChangePass" class="plan-btn btn-red" style="flex: 1;">
+          <i data-lucide="check"></i> Lưu Mật Khẩu Mới
+        </button>
+        <button onclick="closeChangePassModal()" class="plan-btn" style="background: rgba(255,255,255,0.08);">Hủy</button>
+      </div>
+    </div>
+  </div>
+
   <!-- GIAO DIỆN CHÍNH SUPER ADMIN -->
   <div class="master-wrapper" id="masterContentWrapper" style="display: none;">
     <!-- Header -->
@@ -484,7 +163,11 @@
         <h1><i data-lucide="crown" style="color: var(--accent-gold);"></i> TRUNG TÂM KIỂM SOÁT BẢN QUYỀN SAAS (SUPER ADMIN)</h1>
         <p>Quản lý toàn bộ danh sách Công Ty Khách Hàng • Bật / Khóa quyền hoạt động chỉ với 1 cú click</p>
       </div>
-      <div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <div id="dbStatusBadge" class="db-badge-local"><i data-lucide="database"></i> Đang tải...</div>
+        <button onclick="openChangePassModal()" class="plan-btn" style="background: rgba(255,255,255,0.08);" title="Đổi mật khẩu Super Admin">
+          <i data-lucide="key"></i> Đổi Mật Khẩu
+        </button>
         <button id="btnMasterLogout" class="plan-btn" style="background: rgba(255,255,255,0.08);">
           <i data-lucide="log-out"></i> Đăng Xuất
         </button>
@@ -579,7 +262,6 @@
               <tr>
                 <th>Tên Công Ty / Tenant</th>
                 <th>Link Kiosk Điểm Danh</th>
-                <th>Quản Lý Ca</th>
                 <th>Hạn Bản Quyền</th>
                 <th>Trạng Thái</th>
                 <th>Thao Tác Bản Quyền</th>
@@ -619,7 +301,10 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password: pass })
         });
-        const data = await res.json();
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch (e) { data = { detail: text }; }
+
         if (res.ok && data.success) {
           sessionStorage.setItem("super_admin_token", data.token);
           checkSuperAuth();
@@ -641,6 +326,48 @@
       checkSuperAuth();
     });
 
+    // Đổi mật khẩu Super Admin
+    function openChangePassModal() {
+      document.getElementById("changePassModal").style.display = "flex";
+      document.getElementById("inputOldSuperPass").value = "";
+      document.getElementById("inputNewSuperPass").value = "";
+      document.getElementById("inputConfirmSuperPass").value = "";
+    }
+
+    function closeChangePassModal() {
+      document.getElementById("changePassModal").style.display = "none";
+    }
+
+    document.getElementById("btnSubmitChangePass").addEventListener("click", async () => {
+      const oldP = document.getElementById("inputOldSuperPass").value.trim();
+      const newP = document.getElementById("inputNewSuperPass").value.trim();
+      const confP = document.getElementById("inputConfirmSuperPass").value.trim();
+
+      if (!oldP || !newP) return showToast("Vui lòng điền đủ mật khẩu cũ và mới!");
+      if (newP !== confP) return showToast("Mật khẩu xác nhận không trùng khớp!");
+      if (newP.length < 6) return showToast("Mật khẩu mới phải có ít nhất 6 ký tự!");
+
+      try {
+        const res = await fetch("/api/super-admin/change-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ old_password: oldP, new_password: newP })
+        });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch(e) { data = { detail: text }; }
+
+        if (res.ok && data.success) {
+          showToast(data.message);
+          closeChangePassModal();
+        } else {
+          showToast(data.detail || "Đổi mật khẩu thất bại!");
+        }
+      } catch (err) {
+        showToast("Lỗi: " + err.message);
+      }
+    });
+
     async function loadEnterprises() {
       try {
         const res = await fetch("/api/super-admin/enterprises");
@@ -654,6 +381,16 @@
         document.getElementById("activeEnterprises").textContent = activeCount;
         document.getElementById("suspendedEnterprises").textContent = list.length - activeCount;
 
+        // DB Status Badge
+        const dbBadge = document.getElementById("dbStatusBadge");
+        if (data.is_postgres) {
+          dbBadge.className = "db-badge-cloud";
+          dbBadge.innerHTML = '<i data-lucide="cloud-check"></i> Đám Mây Vĩnh Viễn (PostgreSQL)';
+        } else {
+          dbBadge.className = "db-badge-local";
+          dbBadge.innerHTML = '<i data-lucide="hard-drive"></i> Lưu Cục Bộ (SQLite)';
+        }
+
         const currentOrigin = window.location.origin;
 
         list.forEach(ent => {
@@ -663,16 +400,13 @@
 
           tr.innerHTML = `
             <td>
-              <div style="font-weight: 800; color: #fff;">${ent.company_name}</div>
-              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: #8ab4f8;">Mã: ${ent.tenant_code}</div>
+              <div style="font-weight: 800; color: #fff; font-size: 0.95rem;">${ent.company_name}</div>
+              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: #8ab4f8; margin-top: 2px;">Mã: ${ent.tenant_code}</div>
             </td>
             <td>
               <a href="${kioskUrl}" target="_blank" class="link-chip" title="Mở Kiosk khách hàng">
-                <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> /?tenant=${ent.tenant_code}
+                <i data-lucide="external-link" style="width: 13px; height: 13px;"></i> /?tenant=${ent.tenant_code}
               </a>
-            </td>
-            <td style="font-family: var(--font-mono); font-weight: 700; color: #fff;">
-              ${ent.manager_count} Quản lý
             </td>
             <td style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-dim);">
               ${ent.expires_at || 'Vĩnh viễn'}
@@ -725,13 +459,9 @@
             days_valid: days
           })
         });
-        let data;
         const text = await res.text();
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          data = { detail: text };
-        }
+        let data;
+        try { data = JSON.parse(text); } catch (e) { data = { detail: text }; }
 
         if (res.ok) {
           showToast(data.message || "Cấp bản quyền thành công!");

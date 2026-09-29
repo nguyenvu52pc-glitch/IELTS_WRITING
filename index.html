@@ -6,7 +6,7 @@
   <title>Kiosk Điểm Danh & Chấm Công - Enterprise TimeClock SaaS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
@@ -27,8 +27,8 @@
       --border-light: rgba(255, 255, 255, 0.08);
       --font-heading: 'Montserrat', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-      --radius-lg: 18px;
-      --radius-md: 10px;
+      --radius-lg: 20px;
+      --radius-md: 12px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,20 +56,20 @@
     }
 
     .glow-sphere {
-      position: fixed; border-radius: 50%; filter: blur(140px); pointer-events: none; z-index: 0; opacity: 0.25;
+      position: fixed; border-radius: 50%; filter: blur(140px); pointer-events: none; z-index: 0; opacity: 0.22;
     }
     .glow-left { top: -120px; left: -100px; width: 550px; height: 550px; background: var(--primary-red); }
     .glow-right { bottom: -150px; right: -120px; width: 600px; height: 600px; background: #7a0008; }
 
     /* =====================================================================
-       MÀN HÌNH KHÓA BẢN QUYỀN (KHI BỊ SUPER ADMIN KHÓA)
+       1. MÀN HÌNH KHÓA BẢN QUYỀN (SUPER ADMIN SUSPEND)
        ===================================================================== */
     .license-locked-overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       background: rgba(7, 8, 12, 0.98);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(18px);
       z-index: 10000;
       display: none;
       align-items: center;
@@ -80,19 +80,20 @@
     .lock-box {
       background: #141722;
       border: 2px solid var(--primary-red);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 48px;
-      max-width: 540px;
+      max-width: 560px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 0 70px rgba(229, 9, 20, 0.5);
+      box-shadow: 0 0 80px rgba(229, 9, 20, 0.55);
       display: flex;
       flex-direction: column;
       gap: 20px;
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .lock-icon-circle {
-      width: 80px; height: 80px;
+      width: 84px; height: 84px;
       background: rgba(229, 9, 20, 0.15);
       border: 2px solid var(--primary-red);
       border-radius: 50%;
@@ -106,19 +107,19 @@
 
     @keyframes pulseRed {
       0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.6); }
-      70% { box-shadow: 0 0 0 20px rgba(229, 9, 20, 0); }
+      70% { box-shadow: 0 0 0 22px rgba(229, 9, 20, 0); }
       100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
     }
 
     /* =====================================================================
-       MÀN HÌNH ĐĂNG NHẬP MỞ CA CHO QUẢN LÝ (MANAGER LOGIN)
+       2. MÀN HÌNH KÍCH HOẠT KIOSK 1 LẦN DUY NHẤT (GIÁM ĐỐC)
        ===================================================================== */
-    .manager-auth-overlay {
+    .kiosk-auth-overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: rgba(7, 8, 12, 0.92);
-      backdrop-filter: blur(14px);
+      background: rgba(7, 8, 12, 0.94);
+      backdrop-filter: blur(16px);
       z-index: 9000;
       display: none;
       align-items: center;
@@ -128,20 +129,26 @@
 
     .login-card {
       background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 22px;
       padding: 40px;
-      max-width: 440px;
+      max-width: 480px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
       display: flex;
       flex-direction: column;
       gap: 20px;
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .login-card .brand-icon-box {
-      width: 60px; height: 60px;
+      width: 68px; height: 68px;
       background: rgba(229, 9, 20, 0.15);
       border: 1.5px solid var(--primary-red);
       border-radius: 50%;
@@ -170,7 +177,6 @@
       box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
     }
 
-    /* BUTTONS */
     .plan-btn {
       display: inline-flex;
       align-items: center;
@@ -199,7 +205,7 @@
     }
 
     /* =====================================================================
-       GIAO DIỆN CHÍNH KIOSK
+       3. GIAO DIỆN CHÍNH KIOSK
        ===================================================================== */
     .app-wrapper {
       position: relative;
@@ -241,14 +247,14 @@
     }
 
     .brand-name {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       font-weight: 900;
       letter-spacing: 0.5px;
       color: #fff;
     }
 
     .system-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: var(--text-dim);
       display: block;
       margin-top: 2px;
@@ -260,7 +266,7 @@
       gap: 12px;
     }
 
-    .manager-user-tag {
+    .kiosk-status-badge {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -269,8 +275,23 @@
       color: var(--accent-green);
       padding: 8px 16px;
       border-radius: 20px;
-      font-size: 0.86rem;
+      font-size: 0.82rem;
       font-weight: 800;
+      letter-spacing: 0.4px;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--green-glow);
+      animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.7; }
     }
 
     .ctrl-btn {
@@ -324,7 +345,7 @@
       padding: 32px 28px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 22px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
 
@@ -351,7 +372,7 @@
 
     .time-main {
       font-family: var(--font-mono);
-      font-size: 4.2rem;
+      font-size: 4.4rem;
       font-weight: 800;
       letter-spacing: -2px;
       line-height: 1;
@@ -372,8 +393,25 @@
       padding-left: 14px;
     }
 
-    .day-of-week { font-size: 1.15rem; font-weight: 900; color: #fff; }
-    .full-date { font-size: 0.88rem; color: var(--text-dim); margin-top: 3px; }
+    .day-of-week { font-size: 1.2rem; font-weight: 900; color: #fff; }
+    .full-date { font-size: 0.9rem; color: var(--text-dim); margin-top: 4px; }
+
+    .kiosk-info-box {
+      border-top: 1px solid var(--border-light);
+      padding-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+    .info-label { color: var(--text-dim); font-weight: 600; }
+    .info-val { color: #fff; font-weight: 700; font-family: var(--font-mono); }
 
     /* RIGHT PANEL: WORK IN & WORK OUT CARDS */
     .right-panel {
@@ -390,7 +428,7 @@
       background: var(--bg-card);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-lg);
-      padding: 32px 24px;
+      padding: 32px 26px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
@@ -423,40 +461,41 @@
     .out-badge { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid var(--border-light); }
 
     .action-icon-circle {
-      width: 60px; height: 60px;
-      border-radius: 16px;
+      width: 64px; height: 64px;
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 20px 0 16px 0;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
     }
 
     .in-circle { background: linear-gradient(135deg, var(--primary-red) 0%, #800008 100%); color: #fff; }
     .out-circle { background: linear-gradient(135deg, #2b3040 0%, #151822 100%); color: #ff5252; border: 1px solid var(--border-light); }
 
-    .action-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; }
-    .action-sub-vi { font-size: 0.88rem; color: var(--text-dim); margin-top: 4px; }
-    .action-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin: 14px 0 20px 0; }
+    .action-title { font-size: 2rem; font-weight: 900; letter-spacing: -0.5px; }
+    .action-sub-vi { font-size: 0.92rem; color: var(--text-dim); margin-top: 4px; font-weight: 600; }
+    .action-desc { font-size: 0.84rem; color: var(--text-dim); line-height: 1.5; margin: 16px 0 24px 0; }
 
     .btn-cta {
       display: inline-flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      padding: 12px 18px;
+      padding: 13px 18px;
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border-light);
       font-weight: 800;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #fff;
+      transition: all 0.2s;
     }
 
     .action-card:hover .btn-cta { background: var(--primary-red); border-color: var(--primary-red); }
 
     /* =====================================================================
-       FULL-BLEED GOOGLE FORM MODAL (100%)
+       4. FULL-BLEED GOOGLE FORM MODAL
        ===================================================================== */
     .modal-overlay {
       position: fixed;
@@ -507,7 +546,7 @@
     }
 
     /* =====================================================================
-       MODAL CÀI ĐẶT DÀNH CHO GIÁM ĐỐC (DIRECTOR CONSOLE)
+       5. MODAL CÀI ĐẶT CỦA GIÁM ĐỐC (DIRECTOR CONSOLE)
        ===================================================================== */
     .director-modal-overlay {
       position: fixed;
@@ -527,7 +566,7 @@
       border: 1.5px solid rgba(229, 9, 20, 0.4);
       border-radius: 20px;
       width: 100%;
-      max-width: 900px;
+      max-width: 800px;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
@@ -616,50 +655,42 @@
   <div id="licenseLockedOverlay" class="license-locked-overlay">
     <div class="lock-box">
       <div class="lock-icon-circle"><i data-lucide="shield-alert" style="width: 44px; height: 44px;"></i></div>
-      <h2 style="font-size: 1.55rem; font-weight: 900; color: #ff5252;">HỆ THỐNG TẠM NGƯNG BẢN QUYỀN</h2>
-      <div style="font-size: 1rem; font-weight: 700; color: #fff;" id="lockedCompanyName">DOANH NGHIỆP</div>
-      <p style="font-size: 0.88rem; color: var(--text-dim); line-height: 1.6;" id="lockedReasonText">
-        Bản quyền phần mềm của công ty đã bị tạm khóa hoặc hết hạn. Vui lòng liên hệ nhà cung cấp phần mềm SaaS để gia hạn và kích hoạt lại.
+      <h2 style="font-size: 1.6rem; font-weight: 900; color: #ff5252;">HỆ THỐNG TẠM NGƯNG BẢN QUYỀN</h2>
+      <div style="font-size: 1.1rem; font-weight: 700; color: #fff;" id="lockedCompanyName">DOANH NGHIỆP</div>
+      <p style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.6;" id="lockedReasonText">
+        Bản quyền phần mềm của công ty đã bị tạm khóa hoặc hết hạn. Vui lòng liên hệ nhà cung cấp phần mềm SaaS để gia hạn và mở khóa lại.
       </p>
-      <div style="font-size: 0.8rem; font-family: var(--font-mono); color: #8ab4f8; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px;">
-        Mã Doanh Nghiệp (Tenant): <span id="lockedTenantDisplay">...</span>
+      <div style="font-size: 0.82rem; font-family: var(--font-mono); color: #8ab4f8; background: rgba(255,255,255,0.04); padding: 12px; border-radius: 8px;">
+        Mã Định Danh (Tenant): <span id="lockedTenantDisplay">...</span>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================
-       2. MÀN HÌNH ĐĂNG NHẬP MỞ CA CHO QUẢN LÝ (MANAGER LOGIN)
+       2. MÀN HÌNH KÍCH HOẠT THIẾT BỊ 1 LẦN DUY NHẤT (BỞI GIÁM ĐỐC)
        =================================================================== -->
-  <div id="managerLoginOverlay" class="manager-auth-overlay">
+  <div id="kioskActivateModal" class="kiosk-auth-overlay">
     <div class="login-card">
-      <div class="brand-icon-box"><i data-lucide="user-check" style="width: 32px; height: 32px;"></i></div>
+      <div class="brand-icon-box"><i data-lucide="shield-check" style="width: 36px; height: 36px;"></i></div>
       <div>
-        <h2 style="font-size: 1.35rem; font-weight: 900;">ĐĂNG NHẬP MỞ CA KIOSK</h2>
-        <div style="font-size: 0.85rem; color: #ff6b6b; font-weight: 700; margin-top: 4px;" id="loginStoreNameTitle">...</div>
-        <p style="font-size: 0.82rem; color: var(--text-dim); margin-top: 4px;">
-          Dành cho Quản Lý cửa hàng mở ca để nhân viên bấm chấm công:
+        <h2 style="font-size: 1.4rem; font-weight: 900;">KÍCH HOẠT CỔNG KIOSK</h2>
+        <div style="font-size: 0.88rem; color: #ff6b6b; font-weight: 700; margin-top: 4px;" id="activateStoreNameTitle">DOANH NGHIỆP</div>
+        <p style="font-size: 0.82rem; color: var(--text-dim); margin-top: 8px; line-height: 1.5;">
+          Giám Đốc / Chủ quán vui lòng nhập mật khẩu quản trị <b>1 lần duy nhất</b> để mở khóa Kiosk. Sau đó thiết bị sẽ chạy vĩnh viễn cho nhân viên chấm công mà không cần đăng nhập lại.
         </p>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
-        <div>
-          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Tên Đăng Nhập Quản Lý (*):</label>
-          <input type="text" id="inputManagerUsername" class="input-field" placeholder="quanly01" autocomplete="off">
-        </div>
-        <div>
-          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Mật Khẩu Quản Lý (*):</label>
-          <input type="password" id="inputManagerPassword" class="input-field" placeholder="Nhập mật khẩu..." autocomplete="off">
-        </div>
+      <div style="text-align: left;">
+        <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Mật Khẩu Giám Đốc (*):</label>
+        <input type="password" id="inputKioskDirectorPass" class="input-field" placeholder="Nhập mật khẩu Giám Đốc..." autocomplete="off">
       </div>
 
-      <button id="btnManagerLoginSubmit" class="plan-btn btn-red" style="padding: 13px;">
-        <i data-lucide="log-in"></i> MỞ CA CHẤM CÔNG
+      <button id="btnActivateKioskSubmit" class="plan-btn btn-red" style="padding: 14px;">
+        <i data-lucide="key"></i> KÍCH HOẠT THIẾT BỊ NGAY
       </button>
 
-      <div style="margin-top: 4px;">
-        <button id="btnOpenDirectorFromLogin" class="ctrl-btn btn-director" style="width: 100%; justify-content: center; font-size: 0.78rem;">
-          <i data-lucide="settings"></i> Cài Đặt (Dành Cho Giám Đốc)
-        </button>
+      <div style="font-size: 0.76rem; color: var(--text-dim); font-family: var(--font-mono);">
+        Thiết bị sẽ ghi nhớ kích hoạt vĩnh viễn trên trình duyệt này
       </div>
     </div>
   </div>
@@ -679,14 +710,10 @@
       </div>
 
       <div class="system-status-group">
-        <div class="manager-user-tag" id="managerTag">
-          <i data-lucide="shield-check"></i>
-          <span id="headerGreetingText">Quản lý: Đang tải...</span>
+        <div class="kiosk-status-badge">
+          <span class="status-dot"></span>
+          <span>SẴN SÀNG CHẤM CÔNG (24/7)</span>
         </div>
-
-        <button id="btnChangeShift" class="ctrl-btn" title="Đăng xuất đổi ca">
-          <i data-lucide="log-out"></i> Đổi Ca
-        </button>
 
         <button id="btnOpenDirectorModal" class="ctrl-btn btn-director" title="Mở trang cài đặt Giám Đốc">
           <i data-lucide="settings"></i> Cài Đặt (Giám Đốc)
@@ -700,7 +727,7 @@
 
     <!-- Main Workspace -->
     <main class="main-container">
-      <!-- CỘT TRÁI: ĐỒNG HỒ NGUYÊN TỬ -->
+      <!-- CỘT TRÁI: ĐỒNG HỒ NGUYÊN TỬ & THÔNG TIN THIẾT BỊ -->
       <section class="left-panel">
         <div class="clock-card">
           <div class="card-badge">
@@ -720,12 +747,19 @@
             <div class="full-date" id="fullDate">Đang kết nối thời gian thực...</div>
           </div>
 
-          <div style="border-top: 1px solid var(--border-light); padding-top: 16px;">
-            <div style="font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">
-              Quản lý trực ca hiện tại:
+          <div class="kiosk-info-box">
+            <div class="info-row">
+              <span class="info-label">Trạng Thái Bản Quyền:</span>
+              <span class="info-val" style="color: var(--accent-green); font-weight: 800;">✓ CHÍNH HÃNG</span>
             </div>
-            <div style="font-size: 1rem; font-weight: 800; color: #fff;" id="dispManagerName">...</div>
-            <div style="font-size: 0.8rem; color: #8ab4f8;" id="dispManagerRole">...</div>
+            <div class="info-row">
+              <span class="info-label">Cơ Chế Vận Hành:</span>
+              <span class="info-val" style="color: #60a5fa;">TỰ ĐỘNG 24/7</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Phím Tắt Chấm Công:</span>
+              <span class="info-val">[ I ] Vào | [ O ] Ra</span>
+            </div>
           </div>
         </div>
       </section>
@@ -742,7 +776,7 @@
             <h2 class="action-title">WORK IN</h2>
             <h3 class="action-sub-vi">VÀO CA LÀM VIỆC</h3>
           </div>
-          <p class="action-desc">Mở Biểu mẫu Google Form ghi nhận giờ đến, chấm công vào ca và đồng bộ trực tiếp về Google Sheets của quản lý.</p>
+          <p class="action-desc">Mở Biểu mẫu Google Form ghi nhận giờ đến, chụp ảnh điểm danh và đồng bộ trực tiếp về Google Sheets của cửa hàng.</p>
           <div class="btn-cta"><span>Mở Google Form Vào Ca</span> <i data-lucide="arrow-right"></i></div>
         </div>
 
@@ -792,7 +826,7 @@
     <div id="directorAuthCard" class="login-card" style="display: flex;">
       <div class="brand-icon-box"><i data-lucide="lock" style="width: 30px; height: 30px;"></i></div>
       <h2>XÁC THỰC GIÁM ĐỐC</h2>
-      <p style="font-size: 0.82rem; color: var(--text-dim);">Vui lòng nhập mật khẩu Giám Đốc để mở giao diện cài đặt cơ sở & nhân sự:</p>
+      <p style="font-size: 0.82rem; color: var(--text-dim);">Vui lòng nhập mật khẩu Giám Đốc để mở giao diện cài đặt cơ sở & link biểu mẫu:</p>
       <input type="password" id="inputDirectorPass" class="input-field" placeholder="Mật khẩu Giám Đốc..." autocomplete="off">
       <div style="display: flex; gap: 10px;">
         <button id="btnDirectorSubmit" class="plan-btn btn-red" style="flex: 1;"><i data-lucide="unlock"></i> Xác Thực</button>
@@ -812,8 +846,8 @@
 
       <div class="tab-bar">
         <button class="tab-btn active" onclick="switchDirectorTab('tabForms')"><i data-lucide="store"></i> Thông Tin & Google Form</button>
-        <button class="tab-btn" onclick="switchDirectorTab('tabManagers')"><i data-lucide="users"></i> Tài Khoản Quản Lý</button>
         <button class="tab-btn" onclick="switchDirectorTab('tabSecurity')"><i data-lucide="key"></i> Đổi Mật Khẩu Giám Đốc</button>
+        <button class="tab-btn" onclick="switchDirectorTab('tabDevice')"><i data-lucide="smartphone"></i> Quản Lý Thiết Bị</button>
       </div>
 
       <!-- Tab 1: Cấu hình cơ sở & Google Form -->
@@ -843,44 +877,7 @@
         </button>
       </div>
 
-      <!-- Tab 2: Quản lý Quản Lý Ca -->
-      <div id="tabManagers" class="tab-content">
-        <!-- Form thêm Quản lý mới -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
-          <div style="font-weight: 800; color: #fff; font-size: 0.95rem;"><i data-lucide="user-plus"></i> Cấp Tài Khoản Cho Quản Lý Mới</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <input type="text" id="newMgrUsername" class="input-field" placeholder="Tên đăng nhập (Ví dụ: quanly02)">
-            <input type="text" id="newMgrFullName" class="input-field" placeholder="Họ và tên Quản Lý">
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <input type="password" id="newMgrPassword" class="input-field" placeholder="Mật khẩu Quản Lý...">
-            <input type="text" id="newMgrRole" class="input-field" placeholder="Chức vụ (Ví dụ: Quản Lý Ca Sáng)">
-          </div>
-          <button id="btnDirectorAddManager" class="plan-btn btn-red" style="width: fit-content; padding: 10px 18px;">
-            <i data-lucide="plus"></i> Tạo Tài Khoản Quản Lý
-          </button>
-        </div>
-
-        <!-- Bảng danh sách Quản lý -->
-        <div style="overflow-x: auto; border: 1px solid var(--border-light); border-radius: 10px;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-            <thead>
-              <tr style="background: #090b10; color: var(--text-dim); text-align: left;">
-                <th style="padding: 10px 14px;">Tài Khoản</th>
-                <th style="padding: 10px 14px;">Họ và Tên</th>
-                <th style="padding: 10px 14px;">Chức Vụ</th>
-                <th style="padding: 10px 14px;">Trạng Thái</th>
-                <th style="padding: 10px 14px;">Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody id="directorManagersTableBody">
-              <!-- Load dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Tab 3: Đổi mật khẩu Giám Đốc -->
+      <!-- Tab 2: Đổi mật khẩu Giám Đốc -->
       <div id="tabSecurity" class="tab-content">
         <div>
           <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Mật Khẩu Giám Đốc Hiện Tại (*):</label>
@@ -894,20 +891,34 @@
           <i data-lucide="check"></i> Đổi Mật Khẩu Giám Đốc
         </button>
       </div>
+
+      <!-- Tab 3: Quản Lý Thiết Bị Kiosk -->
+      <div id="tabDevice" class="tab-content">
+        <p style="font-size: 0.85rem; color: var(--text-dim); line-height: 1.6;">
+          Thiết bị này hiện đã được kích hoạt và mở sẵn sàng cho nhân viên bấm chấm công. Nếu bạn muốn khóa lại thiết bị này (bắt buộc phải nhập lại mật khẩu Giám Đốc để mở lại), hãy bấm nút dưới đây:
+        </p>
+        <button id="btnLockDevice" class="ctrl-btn" style="color: #ff5252; border-color: rgba(229,9,20,0.5); width: fit-content; padding: 10px 18px;">
+          <i data-lucide="lock"></i> Khóa Lại Thiết Bị Kiosk Này
+        </button>
+      </div>
     </div>
   </div>
 
   <div id="toast" class="toast">Thông báo</div>
 
   <script>
-    // Anti-inspect
+    // Anti-inspect & Hotkeys
     document.addEventListener("contextmenu", (e) => e.preventDefault());
     document.addEventListener("keydown", (e) => {
       if (e.key === "F12") { e.preventDefault(); return false; }
       if (e.ctrlKey && e.shiftKey && ["I","i","J","j","C","c"].includes(e.key)) { e.preventDefault(); return false; }
       if (e.ctrlKey && ["U","u","S","s"].includes(e.key)) { e.preventDefault(); return false; }
-      if (e.key === "i" || e.key === "I") { openForm("WORK_IN"); }
-      if (e.key === "o" || e.key === "O") { openForm("WORK_OUT"); }
+      
+      // Phím I mở WORK IN, phím O mở WORK OUT (khi không gõ vào ô input)
+      if (document.activeElement.tagName !== "INPUT") {
+        if (e.key === "i" || e.key === "I") { openForm("WORK_IN"); }
+        if (e.key === "o" || e.key === "O") { openForm("WORK_OUT"); }
+      }
     });
 
     // Lấy tenant từ URL (?tenant=xyz)
@@ -916,8 +927,8 @@
 
     let currentServerOffsetMs = 0;
     let currentTenantData = null;
-    let currentManager = null;
     let activeFormUrl = "";
+    let directorAuthenticated = false;
 
     // 1. Kiểm tra trạng thái Kiosk & Bản Quyền
     async function checkKioskStatus() {
@@ -925,7 +936,7 @@
         const res = await fetch(`/api/kiosk/status?tenant=${encodeURIComponent(currentTenant)}`);
         const data = await res.json();
 
-        // NẾU BỊ KHÓA BẢN QUYỀN
+        // NẾU BỊ SUPER ADMIN KHÓA BẢN QUYỀN
         if (data.status === "SUSPENDED") {
           document.getElementById("licenseLockedOverlay").style.display = "flex";
           document.getElementById("lockedCompanyName").textContent = data.company_name || "DOANH NGHIỆP";
@@ -942,100 +953,66 @@
         // Cập nhật tên hiển thị
         if (data.branch && data.branch.name) {
           document.getElementById("displayStoreName").textContent = data.branch.name;
-          document.getElementById("loginStoreNameTitle").textContent = data.branch.name;
+          document.getElementById("activateStoreNameTitle").textContent = data.branch.name;
+        } else if (data.company_name) {
+          document.getElementById("displayStoreName").textContent = data.company_name;
+          document.getElementById("activateStoreNameTitle").textContent = data.company_name;
         }
+
         if (data.branch && data.branch.code) {
           document.getElementById("displayBranchName").textContent = data.branch.code;
         }
 
-        // Kiểm tra ca làm việc của Quản Lý
-        checkManagerSession();
+        // Kiểm tra kích hoạt thiết bị 1 lần
+        checkDeviceActivation();
       } catch (err) {
         console.error("Lỗi kết nối máy chủ:", err);
       }
     }
 
-    // 2. Kiểm tra phiên Quản Lý mở ca
-    function checkManagerSession() {
-      const sessKey = `kiosk_manager_${currentTenant}`;
-      const saved = localStorage.getItem(sessKey);
-      if (saved) {
-        try {
-          currentManager = JSON.parse(saved);
-          applyManagerLoggedIn(currentManager);
-          return;
-        } catch (e) {}
+    // 2. Kích hoạt thiết bị 1 lần duy nhất bằng mật khẩu Giám Đốc
+    function checkDeviceActivation() {
+      const actKey = `kiosk_activated_${currentTenant}`;
+      const isActivated = localStorage.getItem(actKey);
+
+      if (isActivated === "true") {
+        document.getElementById("kioskActivateModal").style.display = "none";
+      } else {
+        document.getElementById("kioskActivateModal").style.display = "flex";
       }
-
-      // Chưa mở ca -> hiện hộp thoại Quản lý đăng nhập
-      document.getElementById("managerLoginOverlay").style.display = "flex";
-      document.getElementById("headerGreetingText").textContent = "Chưa Mở Ca";
-      document.getElementById("dispManagerName").textContent = "Chưa có Quản lý trực ca";
-      document.getElementById("dispManagerRole").textContent = "Vui lòng mở ca Kiosk";
     }
 
-    function applyManagerLoggedIn(mgr) {
-      document.getElementById("managerLoginOverlay").style.display = "none";
-      document.getElementById("headerGreetingText").textContent = `Quản lý: ${mgr.manager_name}`;
-      document.getElementById("dispManagerName").textContent = mgr.manager_name;
-      document.getElementById("dispManagerRole").textContent = mgr.role || "CỬA HÀNG TRƯỞNG";
-    }
-
-    // Nút đăng nhập Quản lý mở ca
-    document.getElementById("btnManagerLoginSubmit").addEventListener("click", async () => {
-      const u = document.getElementById("inputManagerUsername").value.trim();
-      const p = document.getElementById("inputManagerPassword").value.trim();
-      if (!u || !p) return showToast("Vui lòng nhập Tên đăng nhập và Mật khẩu Quản Lý!");
+    // Xử lý gửi mật khẩu Giám Đốc để kích hoạt thiết bị
+    document.getElementById("btnActivateKioskSubmit").addEventListener("click", async () => {
+      const pass = document.getElementById("inputKioskDirectorPass").value.trim();
+      if (!pass) return showToast("Vui lòng nhập mật khẩu Giám Đốc!");
 
       try {
-        const res = await fetch("/api/manager/login", {
+        const res = await fetch("/api/kiosk/activate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tenant_code: currentTenant, username: u, password: p })
+          body: JSON.stringify({ tenant_code: currentTenant, password: pass })
         });
         const data = await res.json();
         if (res.ok && data.success) {
-          currentManager = {
-            manager_name: data.manager_name,
-            role: data.role,
-            session_token: data.session_token
-          };
-          localStorage.setItem(`kiosk_manager_${currentTenant}`, JSON.stringify(currentManager));
-          applyManagerLoggedIn(currentManager);
-          document.getElementById("inputManagerUsername").value = "";
-          document.getElementById("inputManagerPassword").value = "";
-          showToast(`🎉 Xin chào ${data.manager_name}! Đã mở ca chấm công thành công.`);
+          localStorage.setItem(`kiosk_activated_${currentTenant}`, "true");
+          document.getElementById("kioskActivateModal").style.display = "none";
+          document.getElementById("inputKioskDirectorPass").value = "";
+          showToast(`🎉 Kích hoạt thiết bị thành công! Cổng chấm công sẵn sàng 24/7.`);
         } else {
-          showToast(data.detail || "Đăng nhập thất bại!");
+          showToast(data.detail || "Mật khẩu Giám Đốc không chính xác!");
         }
       } catch (err) {
         showToast("Lỗi kết nối: " + err.message);
       }
     });
 
-    document.getElementById("inputManagerPassword").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") document.getElementById("btnManagerLoginSubmit").click();
-    });
-
-    // Đổi ca (Đăng xuất Quản lý)
-    document.getElementById("btnChangeShift").addEventListener("click", () => {
-      localStorage.removeItem(`kiosk_manager_${currentTenant}`);
-      currentManager = null;
-      document.getElementById("managerLoginOverlay").style.display = "flex";
-      document.getElementById("headerGreetingText").textContent = "Chưa Mở Ca";
-      document.getElementById("dispManagerName").textContent = "Chưa có Quản lý trực ca";
-      document.getElementById("dispManagerRole").textContent = "Vui lòng mở ca Kiosk";
-      showToast("Đã đóng ca làm việc thành công!");
+    document.getElementById("inputKioskDirectorPass").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnActivateKioskSubmit").click();
     });
 
     // 3. Mở Google Form Điểm Danh (WORK IN & WORK OUT)
     window.openForm = function(type) {
-      if (!currentManager) {
-        showToast("Vui lòng để Quản Lý đăng nhập mở ca trước khi chấm công!");
-        document.getElementById("managerLoginOverlay").style.display = "flex";
-        return;
-      }
-
       const branch = currentTenantData?.branch;
       let formUrl = "";
       if (type === "WORK_IN") {
@@ -1065,14 +1042,19 @@
     // 4. CÀI ĐẶT CỦA GIÁM ĐỐC (DIRECTOR CONSOLE)
     function openDirectorModal() {
       document.getElementById("directorModal").style.display = "flex";
-      document.getElementById("directorAuthCard").style.display = "flex";
-      document.getElementById("directorDashboardCard").style.display = "none";
-      document.getElementById("inputDirectorPass").value = "";
-      document.getElementById("inputDirectorPass").focus();
+      if (!directorAuthenticated) {
+        document.getElementById("directorAuthCard").style.display = "flex";
+        document.getElementById("directorDashboardCard").style.display = "none";
+        document.getElementById("inputDirectorPass").value = "";
+        document.getElementById("inputDirectorPass").focus();
+      } else {
+        document.getElementById("directorAuthCard").style.display = "none";
+        document.getElementById("directorDashboardCard").style.display = "flex";
+        loadDirectorData();
+      }
     }
 
     document.getElementById("btnOpenDirectorModal").addEventListener("click", openDirectorModal);
-    document.getElementById("btnOpenDirectorFromLogin").addEventListener("click", openDirectorModal);
 
     document.getElementById("btnCancelDirectorAuth").addEventListener("click", () => {
       document.getElementById("directorModal").style.display = "none";
@@ -1083,7 +1065,7 @@
       checkKioskStatus();
     });
 
-    // Xác thực mật khẩu Giám Đốc
+    // Xác thực mật khẩu Giám Đốc trong modal Cài Đặt
     document.getElementById("btnDirectorSubmit").addEventListener("click", async () => {
       const pass = document.getElementById("inputDirectorPass").value.trim();
       if (!pass) return showToast("Vui lòng nhập mật khẩu Giám Đốc!");
@@ -1096,6 +1078,7 @@
         });
         const data = await res.json();
         if (res.ok && data.success) {
+          directorAuthenticated = true;
           document.getElementById("directorAuthCard").style.display = "none";
           document.getElementById("directorDashboardCard").style.display = "flex";
           loadDirectorData();
@@ -1131,43 +1114,13 @@
         document.getElementById("dirInputWorkIn").value = data.google_form_work_in || "";
         document.getElementById("dirInputWorkOut").value = data.google_form_work_out || "";
 
-        // Nạp Tab 2: Danh sách Quản lý
-        const tbody = document.getElementById("directorManagersTableBody");
-        tbody.innerHTML = "";
-        (data.managers || []).forEach(mgr => {
-          const isActive = mgr.is_active === 1;
-          const tr = document.createElement("tr");
-          tr.style.borderBottom = "1px solid var(--border-light)";
-          tr.innerHTML = `
-            <td style="padding: 10px 14px; font-family: var(--font-mono); color: #60a5fa; font-weight: 700;">${mgr.username}</td>
-            <td style="padding: 10px 14px; color: #fff; font-weight: 700;">${mgr.full_name}</td>
-            <td style="padding: 10px 14px; color: var(--text-dim);">${mgr.role}</td>
-            <td style="padding: 10px 14px;">
-              <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 800; background: ${isActive ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}; color: ${isActive ? '#34d399' : '#f87171'};">
-                ${isActive ? 'CHO PHÉP' : 'ĐÃ KHÓA'}
-              </span>
-            </td>
-            <td style="padding: 10px 14px;">
-              <div style="display: flex; gap: 6px;">
-                <button class="ctrl-btn" style="padding: 4px 8px; font-size: 0.72rem;" onclick="toggleDirectorManager(${mgr.id})">
-                  ${isActive ? 'Khóa' : 'Mở'}
-                </button>
-                <button class="ctrl-btn" style="padding: 4px 8px; font-size: 0.72rem; color: #ff5252;" onclick="deleteDirectorManager(${mgr.id})">
-                  Xóa
-                </button>
-              </div>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-
         if (window.lucide) lucide.createIcons();
       } catch (err) {
         console.error("Lỗi nạp dữ liệu Giám đốc:", err);
       }
     }
 
-    // Giám đốc Lưu cấu hình
+    // Giám đốc Lưu cấu hình cơ sở & biểu mẫu
     document.getElementById("btnDirectorSaveForms").addEventListener("click", async () => {
       const cName = document.getElementById("dirInputCompanyName").value.trim();
       const bName = document.getElementById("dirInputBranchName").value.trim();
@@ -1191,72 +1144,12 @@
           })
         });
         const data = await res.json();
-        showToast(data.message);
+        showToast(data.message || "Đã lưu cấu hình cơ sở!");
+        checkKioskStatus();
       } catch (err) {
         showToast("Lỗi: " + err.message);
       }
     });
-
-    // Giám đốc thêm Quản lý mới
-    document.getElementById("btnDirectorAddManager").addEventListener("click", async () => {
-      const u = document.getElementById("newMgrUsername").value.trim();
-      const fn = document.getElementById("newMgrFullName").value.trim();
-      const p = document.getElementById("newMgrPassword").value.trim();
-      const r = document.getElementById("newMgrRole").value.trim() || "QUẢN LÝ CA";
-
-      if (!u || !fn || !p) return showToast("Vui lòng điền đủ Tên đăng nhập, Họ tên và Mật khẩu!");
-
-      try {
-        const res = await fetch("/api/director/managers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            tenant_code: currentTenant,
-            username: u,
-            full_name: fn,
-            password: p,
-            role: r
-          })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          showToast(data.message);
-          document.getElementById("newMgrUsername").value = "";
-          document.getElementById("newMgrFullName").value = "";
-          document.getElementById("newMgrPassword").value = "";
-          document.getElementById("newMgrRole").value = "";
-          loadDirectorData();
-        } else {
-          showToast(data.detail || "Không thể tạo tài khoản Quản lý!");
-        }
-      } catch (err) {
-        showToast("Lỗi: " + err.message);
-      }
-    });
-
-    window.toggleDirectorManager = async function(id) {
-      try {
-        const res = await fetch(`/api/director/managers/${id}/toggle`, { method: "POST" });
-        const data = await res.json();
-        showToast(data.message);
-        loadDirectorData();
-      } catch (err) {
-        showToast("Lỗi: " + err.message);
-      }
-    };
-
-    window.deleteDirectorManager = async function(id) {
-      if (confirm("Bạn có chắc chắn muốn xóa tài khoản Quản lý này?")) {
-        try {
-          const res = await fetch(`/api/director/managers/${id}`, { method: "DELETE" });
-          const data = await res.json();
-          showToast(data.message);
-          loadDirectorData();
-        } catch (err) {
-          showToast("Lỗi: " + err.message);
-        }
-      }
-    };
 
     // Giám đốc đổi mật khẩu
     document.getElementById("btnDirectorChangePass").addEventListener("click", async () => {
@@ -1280,6 +1173,17 @@
         }
       } catch (err) {
         showToast("Lỗi: " + err.message);
+      }
+    });
+
+    // Khóa lại thiết bị này
+    document.getElementById("btnLockDevice").addEventListener("click", () => {
+      if (confirm("Bạn có muốn khóa lại thiết bị Kiosk này? Lần tới mở web sẽ yêu cầu mật khẩu Giám Đốc để kích hoạt lại.")) {
+        localStorage.removeItem(`kiosk_activated_${currentTenant}`);
+        directorAuthenticated = false;
+        document.getElementById("directorModal").style.display = "none";
+        checkDeviceActivation();
+        showToast("Thiết bị đã được khóa lại!");
       }
     });
 

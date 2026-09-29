@@ -1,19 +1,17 @@
 """
-ENTERPRISE TIMECLOCK SAAS PRO - MULTI-TENANT BACKEND SERVER (V4.0)
-Hỗ trợ kiến trúc 3 cấp quyền hạn độc lập:
-1. Super Admin (Bạn - Nhà cung cấp SaaS): Quản lý bản quyền, Bật/Tắt kích hoạt các Công Ty
-2. Giám Đốc (Director): Cài đặt tên cơ sở, link Google Form, và cấp tài khoản Quản Lý
-3. Quản Lý (Manager): Đăng nhập mở ca cho Kiosk để nhân viên chấm công
+ENTERPRISE TIMECLOCK SAAS PRO - UNIFIED MULTI-TENANT BACKEND SERVER (V4.1)
+1. Hỗ trợ Đổi Mật Khẩu Super Admin & Lưu Trữ Đám Mây (PostgreSQL / SQLite)
+2. Kiosk Kích Hoạt 1 Lần Bằng Mật Khẩu Giám Đốc -> Hoạt Động Vĩnh Viễn
+3. Loại bỏ phiền phức tài khoản Quản Lý mở ca hàng ngày
+4. Super Admin kiểm soát bật / tắt bản quyền tức thì
 """
 
 import os
-import io
-import csv
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
 
-from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +22,7 @@ import database
 # Khởi tạo DB
 database.init_db()
 
-app = FastAPI(title="Enterprise TimeClock Multi-Tenant SaaS", version="4.0.0")
+app = FastAPI(title="Enterprise TimeClock Multi-Tenant SaaS", version="4.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,7 +37,6 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 os.makedirs(STATIC_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-SUPER_ADMIN_PASSWORD = os.environ.get("SUPER_ADMIN_PASSWORD", "owner@saas2026")
 SUPER_ADMIN_SESSIONS = set()
 DIRECTOR_SESSIONS = set()
 
@@ -49,6 +46,10 @@ DIRECTOR_SESSIONS = set()
 class SuperAdminLoginRequest(BaseModel):
     password: str
 
+class SuperAdminChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
 class CreateEnterpriseRequest(BaseModel):
     company_name: str
     tenant_code: str
@@ -56,9 +57,8 @@ class CreateEnterpriseRequest(BaseModel):
     plan_tier: Optional[str] = "ENTERPRISE"
     days_valid: Optional[int] = 365
 
-class ManagerLoginRequest(BaseModel):
+class KioskActivateRequest(BaseModel):
     tenant_code: str
-    username: str
     password: str
 
 class DirectorLoginRequest(BaseModel):
@@ -72,13 +72,6 @@ class DirectorUpdateConfigRequest(BaseModel):
     branch_code: Optional[str] = ""
     work_in_url: Optional[str] = ""
     work_out_url: Optional[str] = ""
-
-class CreateManagerRequest(BaseModel):
-    tenant_code: str
-    username: str
-    full_name: str
-    password: str
-    role: Optional[str] = "QUẢN LÝ CA"
 
 class DirectorChangePasswordRequest(BaseModel):
     tenant_code: str
@@ -95,33 +88,47 @@ def find_static_file(filename: str):
             return candidate
     return None
 
+def verify_super_admin_pass(raw_pass: str) -> bool:
+    custom_hash = database.get_setting("super_admin_password_hash")
+    if custom_hash:
+        return custom_hash == database.hash_password(raw_pass.strip())
+    default_pass = os.environ.get("SUPER_ADMIN_PASSWORD", "owner@saas2026")
+    return raw_pass.strip() == default_pass
+
 # =====================================================================
 # 1. API SUPER ADMIN (DÀNH CHO BẠN - QUẢN LÝ BẢN QUYỀN CÁC CÔNG TY)
 # =====================================================================
 @app.post("/api/super-admin/login")
 def super_admin_login(req: SuperAdminLoginRequest):
-    if req.password.strip() == SUPER_ADMIN_PASSWORD:
+    if verify_super_admin_pass(req.password):
         token = str(uuid.uuid4())
         SUPER_ADMIN_SESSIONS.add(token)
         return {"success": True, "token": token, "message": "Đăng nhập Super Admin thành công!"}
     raise HTTPException(status_code=401, detail="Mật khẩu Super Admin không chính xác!")
 
+@app.post("/api/super-admin/change-password")
+def super_admin_change_password(req: SuperAdminChangePasswordRequest):
+    if not verify_super_admin_pass(req.old_password):
+        raise HTTPException(status_code=401, detail="Mật khẩu Super Admin hiện tại không chính xác!")
+    new_p = req.new_password.strip()
+    if len(new_p) < 6:
+        raise HTTPException(status_code=400, detail="Mật khẩu mới phải có ít nhất 6 ký tự!")
+    database.set_setting("super_admin_password_hash", database.hash_password(new_p))
+    return {"success": True, "message": "Đã đổi mật khẩu Super Admin thành công và lưu vĩnh viễn!"}
+
 @app.get("/api/super-admin/enterprises")
 def get_all_enterprises():
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
+    enterprises = database.query("""
         SELECT e.id, e.company_name, e.tenant_code, e.status, e.plan_tier, e.expires_at, e.created_at,
-               b.branch_name,
-               (SELECT COUNT(*) FROM managers m WHERE m.enterprise_id = e.id) as manager_count
+               b.branch_name
         FROM enterprises e
         LEFT JOIN branches b ON b.enterprise_id = e.id
-        GROUP BY e.id
         ORDER BY e.id DESC
     """)
-    enterprises = [dict(r) for r in cursor.fetchall()]
-    conn.close()
-    return {"enterprises": enterprises}
+    return {
+        "enterprises": enterprises,
+        "is_postgres": database.IS_POSTGRES
+    }
 
 @app.post("/api/super-admin/enterprises")
 def create_enterprise(req: CreateEnterpriseRequest):
@@ -136,13 +143,9 @@ def create_enterprise(req: CreateEnterpriseRequest):
     if not d_pass:
         raise HTTPException(status_code=400, detail="Vui lòng đặt mật khẩu ban đầu cho Giám Đốc!")
 
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    
     # Kiểm tra mã tenant
-    cursor.execute("SELECT id FROM enterprises WHERE tenant_code = ?", (t_code,))
-    if cursor.fetchone():
-        conn.close()
+    existing = database.query_one("SELECT id FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
+    if existing:
         raise HTTPException(status_code=400, detail=f"Mã công ty '{t_code}' đã tồn tại trên hệ thống!")
 
     expires = (datetime.now() + timedelta(days=req.days_valid or 365)).strftime("%Y-%m-%d")
@@ -150,70 +153,52 @@ def create_enterprise(req: CreateEnterpriseRequest):
     lic_key = f"SAAS-{t_code.upper()}-{uuid.uuid4().hex[:6].upper()}"
 
     try:
-        cursor.execute("""
+        database.execute("""
             INSERT INTO enterprises (company_name, tenant_code, license_key, director_password_hash, status, plan_tier, expires_at)
             VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?)
         """, (c_name, t_code, lic_key, d_hash, req.plan_tier or "ENTERPRISE", expires))
-        ent_id = cursor.lastrowid
 
-        # Tạo branch mặc định cho công ty
-        cursor.execute("""
+        ent = database.query_one("SELECT id FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
+        ent_id = ent["id"]
+
+        database.execute("""
             INSERT INTO branches (enterprise_id, branch_name, branch_code, google_form_work_in, google_form_work_out)
             VALUES (?, ?, ?, '', '')
         """, (ent_id, f"{c_name} - Cơ Sở 01", "Cổng Điểm Danh Chi Nhánh 1"))
 
-        conn.commit()
     except Exception as e:
-        conn.close()
         raise HTTPException(status_code=400, detail=f"Lỗi tạo doanh nghiệp: {str(e)}")
 
-    conn.close()
     return {"success": True, "message": f"Đã cấp bản quyền thành công cho công ty: {c_name} (Mã: {t_code})"}
 
 @app.post("/api/super-admin/enterprises/{ent_id}/toggle")
 def toggle_enterprise_status(ent_id: int):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT status, company_name FROM enterprises WHERE id = ?", (ent_id,))
-    ent = cursor.fetchone()
+    ent = database.query_one("SELECT status, company_name FROM enterprises WHERE id = ?", (ent_id,))
     if not ent:
-        conn.close()
         raise HTTPException(status_code=404, detail="Không tìm thấy công ty!")
 
     new_status = "SUSPENDED" if ent["status"] == "ACTIVE" else "ACTIVE"
-    cursor.execute("UPDATE enterprises SET status = ? WHERE id = ?", (new_status, ent_id))
-    conn.commit()
-    conn.close()
+    database.execute("UPDATE enterprises SET status = ? WHERE id = ?", (new_status, ent_id))
     action_text = "ĐÃ KÍCH HOẠT" if new_status == "ACTIVE" else "ĐÃ KHÓA BẢN QUYỀN"
     return {"success": True, "status": new_status, "message": f"{action_text} công ty: {ent['company_name']}"}
 
 @app.delete("/api/super-admin/enterprises/{ent_id}")
 def delete_enterprise(ent_id: int):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM managers WHERE enterprise_id = ?", (ent_id,))
-    cursor.execute("DELETE FROM branches WHERE enterprise_id = ?", (ent_id,))
-    cursor.execute("DELETE FROM enterprises WHERE id = ?", (ent_id,))
-    conn.commit()
-    conn.close()
+    database.execute("DELETE FROM branches WHERE enterprise_id = ?", (ent_id,))
+    database.execute("DELETE FROM enterprises WHERE id = ?", (ent_id,))
     return {"success": True, "message": "Đã xóa công ty khỏi hệ thống!"}
 
 # =====================================================================
-# 2. API KIOSK STATUS & ĐĂNG NHẬP MỞ CA CHO QUẢN LÝ
+# 2. API KIOSK STATUS & KÍCH HOẠT 1 LẦN BẰNG MẬT KHẨU GIÁM ĐỐC
 # =====================================================================
 @app.get("/api/kiosk/status")
 def get_kiosk_status(tenant: Optional[str] = None):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-
     if tenant:
-        cursor.execute("SELECT * FROM enterprises WHERE LOWER(tenant_code) = ?", (tenant.strip().lower(),))
+        ent = database.query_one("SELECT * FROM enterprises WHERE LOWER(tenant_code) = ?", (tenant.strip().lower(),))
     else:
-        cursor.execute("SELECT * FROM enterprises ORDER BY id ASC LIMIT 1")
+        ent = database.query_one("SELECT * FROM enterprises ORDER BY id ASC")
     
-    ent = cursor.fetchone()
     if not ent:
-        conn.close()
         return {
             "status": "SUSPENDED",
             "company_name": "Doanh Nghiệp Chưa Đăng Ký",
@@ -222,7 +207,6 @@ def get_kiosk_status(tenant: Optional[str] = None):
 
     # KIỂM TRA BẢN QUYỀN: BẬT HAY KHÓA?
     if ent["status"] != "ACTIVE":
-        conn.close()
         return {
             "status": "SUSPENDED",
             "tenant_code": ent["tenant_code"],
@@ -230,12 +214,8 @@ def get_kiosk_status(tenant: Optional[str] = None):
             "detail": "BẢN QUYỀN HỆ THỐNG ĐÃ TẠM KHÓA HOẶC HẾT HẠN. Vui lòng liên hệ nhà cung cấp phần mềm để gia hạn / kích hoạt."
         }
 
-    # Lấy thông tin chi nhánh
-    cursor.execute("SELECT * FROM branches WHERE enterprise_id = ? ORDER BY id ASC LIMIT 1", (ent["id"],))
-    branch = cursor.fetchone()
-    conn.close()
-
-    branch_dict = dict(branch) if branch else {}
+    branch = database.query_one("SELECT * FROM branches WHERE enterprise_id = ? ORDER BY id ASC", (ent["id"],))
+    branch_dict = branch or {}
     now = datetime.now()
 
     return {
@@ -244,7 +224,7 @@ def get_kiosk_status(tenant: Optional[str] = None):
         "company_name": ent["company_name"],
         "branch": {
             "name": branch_dict.get("branch_name", ent["company_name"]),
-            "code": branch_dict.get("branch_code", "Cổng Điểm Danh & Chấm Công"),
+            "code": branch_dict.get("branch_code", "Cổng Điểm Danh Tự Động"),
             "google_form_work_in": branch_dict.get("google_form_work_in", ""),
             "google_form_work_out": branch_dict.get("google_form_work_out", "")
         },
@@ -252,76 +232,42 @@ def get_kiosk_status(tenant: Optional[str] = None):
         "server_epoch_ms": int(now.timestamp() * 1000)
     }
 
-@app.post("/api/manager/login")
-def manager_login(req: ManagerLoginRequest):
+@app.post("/api/kiosk/activate")
+def kiosk_activate(req: KioskActivateRequest):
     """
-    Quản lý cửa hàng đăng nhập mở ca tại Kiosk
+    Kích hoạt Kiosk 1 lần duy nhất bằng Mật khẩu Giám Đốc -> Kiosk hoạt động vĩnh viễn
     """
     t_code = req.tenant_code.strip().lower()
-    u_name = req.username.strip()
     raw_pass = req.password.strip()
 
-    conn = database.get_connection()
-    cursor = conn.cursor()
-
-    # Kiểm tra enterprise
-    cursor.execute("SELECT id, status, company_name FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
-    ent = cursor.fetchone()
+    ent = database.query_one("SELECT id, director_password_hash, company_name, status FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
     if not ent:
-        conn.close()
         raise HTTPException(status_code=404, detail="Không tìm thấy thông tin doanh nghiệp!")
 
     if ent["status"] != "ACTIVE":
-        conn.close()
-        raise HTTPException(status_code=403, detail="Bản quyền doanh nghiệp đang bị tạm ngưng! Không thể mở ca.")
-
-    # Tìm Quản Lý
-    cursor.execute("""
-        SELECT * FROM managers 
-        WHERE enterprise_id = ? AND LOWER(username) = ?
-    """, (ent["id"], u_name.lower()))
-    manager = cursor.fetchone()
-
-    if not manager:
-        conn.close()
-        raise HTTPException(status_code=401, detail="Tài khoản Quản lý không tồn tại!")
-
-    if not manager["is_active"]:
-        conn.close()
-        raise HTTPException(status_code=403, detail="Tài khoản Quản lý này đang bị Giám đốc tạm khóa!")
+        raise HTTPException(status_code=403, detail="Bản quyền doanh nghiệp đang bị khóa bởi nhà cung cấp!")
 
     expected_hash = database.hash_password(raw_pass)
-    if manager["password_hash"] != expected_hash:
-        conn.close()
-        raise HTTPException(status_code=401, detail="Mật khẩu Quản lý không chính xác!")
+    if ent["director_password_hash"] != expected_hash:
+        raise HTTPException(status_code=401, detail="Mật khẩu Giám Đốc không chính xác!")
 
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute("UPDATE managers SET last_login = ? WHERE id = ?", (now_str, manager["id"]))
-    conn.commit()
-    conn.close()
-
+    token = str(uuid.uuid4())
     return {
         "success": True,
-        "manager_name": manager["full_name"],
-        "role": manager["role"],
-        "session_token": str(uuid.uuid4()),
-        "welcome_text": f"Quản lý: {manager['full_name']}"
+        "token": token,
+        "company_name": ent["company_name"],
+        "message": f"Kích hoạt thành công Kiosk cho: {ent['company_name']}! Kiosk sẽ mở sẵn sàng cho nhân viên chấm công."
     }
 
 # =====================================================================
-# 3. API DÀNH RIÊNG CHO GIÁM ĐỐC (CÀI ĐẶT FORM & QUẢN LÝ TÀI KHOẢN)
+# 3. API DÀNH RIÊNG CHO GIÁM ĐỐC (CÀI ĐẶT FORM & CƠ SỞ)
 # =====================================================================
 @app.post("/api/director/login")
 def director_login(req: DirectorLoginRequest):
     t_code = req.tenant_code.strip().lower()
     raw_pass = req.password.strip()
 
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, director_password_hash, company_name, status FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
-    ent = cursor.fetchone()
-    conn.close()
-
+    ent = database.query_one("SELECT id, director_password_hash, company_name, status FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
     if not ent:
         raise HTTPException(status_code=404, detail="Không tìm thấy doanh nghiệp!")
 
@@ -338,27 +284,13 @@ def director_login(req: DirectorLoginRequest):
 
 @app.get("/api/director/config")
 def get_director_config(tenant: str):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT id, company_name, tenant_code FROM enterprises WHERE LOWER(tenant_code) = ?", (tenant.strip().lower(),))
-    ent = cursor.fetchone()
+    t_code = tenant.strip().lower()
+    ent = database.query_one("SELECT id, company_name, tenant_code FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
     if not ent:
-        conn.close()
         raise HTTPException(status_code=404, detail="Không tìm thấy doanh nghiệp!")
 
-    cursor.execute("SELECT * FROM branches WHERE enterprise_id = ? ORDER BY id ASC LIMIT 1", (ent["id"],))
-    branch = cursor.fetchone()
-    branch_dict = dict(branch) if branch else {}
-
-    cursor.execute("""
-        SELECT id, username, full_name, role, is_active, last_login, created_at
-        FROM managers
-        WHERE enterprise_id = ?
-        ORDER BY id DESC
-    """, (ent["id"],))
-    managers = [dict(m) for m in cursor.fetchall()]
-    conn.close()
+    branch = database.query_one("SELECT * FROM branches WHERE enterprise_id = ? ORDER BY id ASC", (ent["id"],))
+    branch_dict = branch or {}
 
     return {
         "company_name": ent["company_name"],
@@ -366,27 +298,21 @@ def get_director_config(tenant: str):
         "branch_name": branch_dict.get("branch_name", ""),
         "branch_code": branch_dict.get("branch_code", ""),
         "google_form_work_in": branch_dict.get("google_form_work_in", ""),
-        "google_form_work_out": branch_dict.get("google_form_work_out", ""),
-        "managers": managers
+        "google_form_work_out": branch_dict.get("google_form_work_out", "")
     }
 
 @app.post("/api/director/update-config")
 def update_director_config(req: DirectorUpdateConfigRequest):
     t_code = req.tenant_code.strip().lower()
-    conn = database.get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT id FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
-    ent = cursor.fetchone()
+    ent = database.query_one("SELECT id FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
     if not ent:
-        conn.close()
         raise HTTPException(status_code=404, detail="Không tìm thấy doanh nghiệp!")
 
     # Cập nhật tên công ty
-    cursor.execute("UPDATE enterprises SET company_name = ? WHERE id = ?", (req.company_name.strip(), ent["id"]))
+    database.execute("UPDATE enterprises SET company_name = ? WHERE id = ?", (req.company_name.strip(), ent["id"]))
 
     # Cập nhật thông tin chi nhánh & Google Form
-    cursor.execute("""
+    database.execute("""
         UPDATE branches
         SET branch_name = ?, branch_code = ?, google_form_work_in = ?, google_form_work_out = ?
         WHERE enterprise_id = ?
@@ -398,91 +324,22 @@ def update_director_config(req: DirectorUpdateConfigRequest):
         ent["id"]
     ))
 
-    conn.commit()
-    conn.close()
     return {"success": True, "message": "Giám đốc đã lưu thông tin cơ sở và biểu mẫu thành công!"}
-
-@app.post("/api/director/managers")
-def add_manager_by_director(req: CreateManagerRequest):
-    t_code = req.tenant_code.strip().lower()
-    u_name = req.username.strip()
-    f_name = req.full_name.strip()
-    raw_pass = req.password.strip()
-
-    if not u_name or not f_name or not raw_pass:
-        raise HTTPException(status_code=400, detail="Vui lòng điền đủ Tên đăng nhập, Họ tên và Mật khẩu!")
-
-    conn = database.get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT id FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
-    ent = cursor.fetchone()
-    if not ent:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Không tìm thấy doanh nghiệp!")
-
-    p_hash = database.hash_password(raw_pass)
-
-    try:
-        cursor.execute("""
-            INSERT INTO managers (enterprise_id, username, full_name, password_hash, role, is_active)
-            VALUES (?, ?, ?, ?, ?, 1)
-        """, (ent["id"], u_name, f_name, p_hash, req.role or "QUẢN LÝ CA"))
-        conn.commit()
-    except Exception:
-        conn.close()
-        raise HTTPException(status_code=400, detail=f"Tên đăng nhập '{u_name}' đã tồn tại trong doanh nghiệp này!")
-
-    conn.close()
-    return {"success": True, "message": f"Giám đốc đã cấp tài khoản Quản lý cho: {f_name}"}
-
-@app.post("/api/director/managers/{mgr_id}/toggle")
-def toggle_manager(mgr_id: int):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT is_active, full_name FROM managers WHERE id = ?", (mgr_id,))
-    row = cursor.fetchone()
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Không tìm thấy tài khoản quản lý!")
-
-    new_st = 0 if row["is_active"] else 1
-    cursor.execute("UPDATE managers SET is_active = ? WHERE id = ?", (new_st, mgr_id))
-    conn.commit()
-    conn.close()
-    txt = "ĐÃ MỞ KHÓA" if new_st == 1 else "ĐÃ TẠM KHÓA"
-    return {"success": True, "is_active": new_st, "message": f"{txt} tài khoản: {row['full_name']}"}
-
-@app.delete("/api/director/managers/{mgr_id}")
-def delete_manager(mgr_id: int):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM managers WHERE id = ?", (mgr_id,))
-    conn.commit()
-    conn.close()
-    return {"success": True, "message": "Đã xóa tài khoản Quản lý!"}
 
 @app.post("/api/director/change-password")
 def change_director_password(req: DirectorChangePasswordRequest):
     t_code = req.tenant_code.strip().lower()
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, director_password_hash FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
-    ent = cursor.fetchone()
+    ent = database.query_one("SELECT id, director_password_hash FROM enterprises WHERE LOWER(tenant_code) = ?", (t_code,))
 
     if not ent:
-        conn.close()
         raise HTTPException(status_code=404, detail="Không tìm thấy doanh nghiệp!")
 
     old_hash = database.hash_password(req.old_password.strip())
     if ent["director_password_hash"] != old_hash:
-        conn.close()
         raise HTTPException(status_code=401, detail="Mật khẩu Giám Đốc hiện tại không đúng!")
 
     new_hash = database.hash_password(req.new_password.strip())
-    cursor.execute("UPDATE enterprises SET director_password_hash = ? WHERE id = ?", (new_hash, ent["id"]))
-    conn.commit()
-    conn.close()
+    database.execute("UPDATE enterprises SET director_password_hash = ? WHERE id = ?", (new_hash, ent["id"]))
     return {"success": True, "message": "Giám đốc đã đổi mật khẩu thành công!"}
 
 # =====================================================================
@@ -504,7 +361,7 @@ def serve_super_admin():
 
 @app.get("/admin", response_class=HTMLResponse)
 def serve_admin():
-    p = find_static_file("admin.html")
+    p = find_static_file("super_admin.html")
     if p:
         return FileResponse(p)
     return FileResponse(find_static_file("index.html"))
@@ -513,7 +370,7 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     print("\n" + "="*70)
-    print(">> ENTERPRISE TIMECLOCK SAAS PRO V4.0 (MULTI-TENANT) RUNNING")
+    print(">> ENTERPRISE TIMECLOCK SAAS PRO V4.1 RUNNING")
     print(f">> Master Server listening on: http://0.0.0.0:{port}")
     print(f">> Super Admin Portal: http://0.0.0.0:{port}/super-admin")
     print("="*70 + "\n")
